@@ -17,7 +17,7 @@ export const selectPurchaseTenderSlice = createSlice({
             action: PayloadAction<TenderItem>
         ) => {
             const index = state.findIndex(
-                item => item.TenderNumber === action.payload.TenderNumber
+                item => item.tenderId === action.payload.tenderId
             );
 
             if (index !== -1) {

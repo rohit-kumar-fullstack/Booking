@@ -7,9 +7,11 @@ import Home from "./Home/Home";
 import Login from "./Login/Login";
 import Onboarding from "./Onboarding/Onboarding";
 import Splash from "./Splash/Splash";
+import ProceedToBidDetail from "./Tender/ProceedToBidDetail";
 import ProceedToPurTender from "./Tender/ProceedToPurTender";
 import PurchaseTenderList from "./Tender/PurchaseTenderList";
 import Tender from "./Tender/Tender";
+import TenderBidding from "./Tender/tenderBidding/TenderBidding";
 
 
 const Screens = {
@@ -24,6 +26,8 @@ const Screens = {
     StartBidding,
     PurchaseAuctionList,
     PurchaseTenderList,
-    ProceedToPurTender
+    ProceedToPurTender,
+    TenderBidding,
+    ProceedToBidDetail
 }
 export default Screens

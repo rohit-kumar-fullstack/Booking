@@ -32,6 +32,8 @@ interface Props {
 }
 
 const TenderFullDetail: React.FC<Props> = ({ visible, onClose, data }) => {
+
+  
   const inset = useSafeAreaInsets();
   const { data: tenderResponse }: any = useFetchTenderById(data?.tenderId);
   const tender = tenderResponse?.data?.[0];

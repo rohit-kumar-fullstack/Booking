@@ -19,7 +19,6 @@ const PurchaseTenderList = () => {
   };
 
 
-  console.log("SelectedPurchaseList : ", SelectedPurchaseList)
   return (
     <View style={styles.screen}>
       <InsideHeader title="Purchase" showArrow />

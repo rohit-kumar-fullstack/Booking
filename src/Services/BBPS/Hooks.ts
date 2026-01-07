@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
-import { fetchDashboard, fetchLiveAuction, fetchLiveTender, fetchPurchaseAuction, fetchPurchaseTender, offlineAuctionPurchase, userLogin, offlineTenderPurchase, fetchTenderById } from './apis';
+import { fetchDashboard, fetchLiveAuction, fetchLiveTender, fetchPurchaseAuction, fetchPurchaseTender, offlineAuctionPurchase, userLogin, offlineTenderPurchase, fetchTenderById, proceedToBid } from './apis';
 
 // User
 
@@ -19,11 +19,31 @@ export const useDashboard = () => {
 
 // Auction & Tender
 
-export const useFetchPurchaseTender = (size: number) => {
-    return useQuery({
-        queryKey: ['purchaseTender', size],
-        queryFn: () => fetchPurchaseTender({ page: 0, size }),
-    });
+export const useFetchPurchaseTender = () => {
+  return useInfiniteQuery({
+    queryKey: ['fetchPurchaseTender'],
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) =>
+      fetchPurchaseTender({
+        page: pageParam,
+        size: 10,
+      }),
+
+    getNextPageParam: (lastPage) => {
+      const { page, size, totalCount } = lastPage;
+
+      const totalPages = Math.ceil(totalCount / size);
+
+      return page < totalPages ? page + 1 : undefined;
+    },
+
+    select: (data) => ({
+      ...data,
+      result: data.pages.flatMap(
+        (page: any) => page?.data ?? []
+      ),
+    }),
+  });
 };
 
 
@@ -37,27 +57,7 @@ export const useFetchLiveTender = () => {
 export const useFetchPurchaseAuction = () => {
     return useQuery({
         queryKey: ['fetchPurchaseAuction',],
-         queryFn: ({ pageParam = 1 }) =>
-            fetchPurchaseAuction({
-                page: pageParam,
-                    size: 10,
-                }),
-        getNextPageParam: (lastPage: any) => {
-            const { page, size, totalCount } = lastPage;
-            const totalPages = Math.ceil(totalCount / size);
-            const nextPage = page + 1;
-            return nextPage < totalPages ? nextPage : undefined;
-        },
-        select: (data) => {
-
-            const mergedResults = data.pages.flatMap((page: any) => page.data ?? []);
-
-            console.log("mergedResults for tender : ", mergedResults)
-            return {
-                ...data,
-                result: mergedResults,
-            };
-        },
+        queryFn: () => fetchPurchaseAuction()
     });
 };
 
@@ -107,7 +107,16 @@ export const useFetchTenderById = (tenderId: string) => {
     return useQuery({
         queryKey: ['fetchTenderById', tenderId],
         queryFn: () => fetchTenderById(tenderId)
+        
     });
 }
+
+export const useProceedToBid = (tenderId?: string) => {
+  return useQuery({
+    queryKey: ['proceedToBid', tenderId],
+    queryFn: () => proceedToBid(tenderId as string),
+    enabled: false, // 👈 manual trigger
+  });
+};
 
 

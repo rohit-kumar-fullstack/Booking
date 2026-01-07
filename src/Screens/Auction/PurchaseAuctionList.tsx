@@ -49,8 +49,7 @@ const PurchaseAuctionList = () => {
     const [loading, setLoading] = useState(false);
     const [list, setList] = useState(dummyAuctionList);
     const SelectedPurchaseList = useSelector((state: any) => state.selectPurchaseAuction);
-    console.log(SelectedPurchaseList,'iiiiiiiiiiiiiiiiiiiiiiii');
-    
+  
     const { mutate, isPending } = useOfflineAuctionPurchase()
     const calculateTotalAmount = (item: any) => {
         const gstAmount =
@@ -80,7 +79,6 @@ const PurchaseAuctionList = () => {
         };
 
         try {
-            // console.log(body);
             mutate(body, {
                 onSuccess: (res) => {
                     console.log(res, '---------------------purchsase response');

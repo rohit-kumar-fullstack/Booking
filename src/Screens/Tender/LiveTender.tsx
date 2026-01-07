@@ -17,7 +17,6 @@ const LiveTender = () => {
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isRefetching, refetch }: any = useFetchLiveTender();
     const [showRefreshBanner, setShowRefreshBanner] = useState(false);
 
-    console.log("live tender SelectedPurchaseList : ", SelectedPurchaseList)
     useEffect(() => {
         if (isRefetching) {
             setShowRefreshBanner(true);

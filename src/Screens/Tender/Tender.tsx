@@ -30,12 +30,9 @@ const Tender = () => {
   const { data: purchaseTenderData = {} } : any = useFetchPurchaseTender();
   const SelectedPurchaseList = useSelector((state: any) => state?.selectPurchaseTender);
 
-
-  console.log("liveTenderData : ", liveTenderData)
-  console.log("purchaseTenderData : ", purchaseTenderData)
   const liveCount = liveTenderData?.totalCount || 0;
 
-  const purchaseCount = purchaseTenderData?.totalCount || 0;
+  const purchaseCount = purchaseTenderData?.pages?.[0]?.totalCount || 0;
   const [selectedTab, setSelectedTab] = useState<'live' | 'purchase'>('live');
 
   const translateX = useRef(new Animated.Value(0)).current;

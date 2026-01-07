@@ -12,8 +12,7 @@ const ProceedToPurTender = () => {
     const navigation: any = useNavigation();
     const [loading, setLoading] = useState(false);
     const SelectedPurchaseList = useSelector((state: any) => state.selectPurchaseTender);
-    console.log(SelectedPurchaseList, 'iiiiiiiiiiiiiiiiiiiiiiii  tender purchase list : ', SelectedPurchaseList);
-
+  
     const { mutate, isPending } = useOfflineTenderPurchase()
     const calculateTotalAmount = (item: any) => {
         const gstAmount =
@@ -50,7 +49,6 @@ const ProceedToPurTender = () => {
 
         console.log("tender offline body : ", body)
         try {
-            // console.log(body);
             mutate(body, {
                 onSuccess: (res) => {
                     console.log(res, '---------------------purchsase response');

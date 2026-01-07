@@ -4,7 +4,8 @@ import moment from 'moment';
 import colors from '../../Constant/Color';
 import { LiveTenderTileProps } from './types/types';
 import { Calendar, Tag, Info, ArrowRight } from 'lucide-react-native';
-import TenderDetail from './Modal/TenderDetail';
+import TenderDetail from './Modal/TenderFullDetail';
+import TenderFullDetail from './Modal/TenderFullDetail';
 
 const LiveTenderTile: React.FC<LiveTenderTileProps> = ({
   data,
@@ -103,7 +104,7 @@ const LiveTenderTile: React.FC<LiveTenderTileProps> = ({
         </View>
 
         {/* Tender Detail Modal */}
-        <TenderDetail visible={showDetail} data={data} onClose={() => setShowDetail(false)} />
+        <TenderFullDetail visible={showDetail} data={data} onClose={() => setShowDetail(false)} />
       </TouchableOpacity>
     </View>
   );

@@ -13,8 +13,11 @@ export const tenderSlice = createSlice({
         },
         removeTender: (state) => {
             state.tender = '';
-        }
+        },
+        setTenderDetails: (state, { payload }) => {
+            state.tender = payload;
+        },
     },
 });
-export const { setTender , removeTender} = tenderSlice.actions;
+export const { setTender , removeTender, setTenderDetails } = tenderSlice.actions;
 export default tenderSlice.reducer;

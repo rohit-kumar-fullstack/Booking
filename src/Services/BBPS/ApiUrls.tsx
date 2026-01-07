@@ -34,7 +34,7 @@ const PURCHASE_OFFLINE_AUCTION = `${BASE_URL_Auction}api/auction/purchaseAuction
 const PURCHASE_TENDER = `https://procurelinc.in/EProcurementSB/tenderPayment/purchaseTender`
 const PURCHASE_TENDER_OFFLINE = `https://procurelinc.in/EProcurementSB/tenderPayment/purchaseTenderOffline`
 const AUCTION_PURCHASE_STATUS = `https://api.godemo.in/Auction/api/auction/transactionStatus?orderNo=`
-const GET_TENDER_DETAILS = `${BASE_URL}eTendering/getTenderById?tenderId=`
+const GET_TENDER_DETAILS = `https://procurelinc.in/EProcurementSB/tenderBidding/getTenderDetail?tenderId=`
 const GET_DOCID = `${BASE_URL}eTendering/download/docId?docId=`
 // https://procurelinc.in/EProcurementSB/eTendering/download/docId?docId=158 
 // const DOWNLOAD_DOC = `${BASE_URL}eTende                                                                                                                              ring/download/docId?docId=`
@@ -66,6 +66,12 @@ const DASHBOARD_COUNT = `${BASE_URL_Auction}api/auction/home/dashboard/counts`
 //tender 
 
 const TENDER_LOGIN = `${BASE_URL}eproc/loginWithoutDecryption`
+const PROCEED_TO_BID = `${BASE_URL}tenderBidding/proceedToBid?tenderId=`
+const SUBMIT_ENVELOPE_A = `${BASE_URL}tenderBidding/getSaveEnvelopeAData`
+const SUBMIT_ENVELOPE_B = `${BASE_URL}tenderBidding/getSaveEnvelopeBData`
+const SUBMIT_ENVELOPE_FILE_A = `${BASE_URL}tenderBidding/addDocumentsEnvelopeA?requestDto=`
+const SUBMIT_ENVELOPE_FILE_B = `${BASE_URL}tenderBidding/addDocumentsEnvelopeB?requestDto=`
+
 
 
 export {
@@ -127,5 +133,10 @@ export {
   PURCHASE_OFFLINE_AUCTION,
   TENDER_LOGIN,
   PURCHASE_TENDER_OFFLINE,
+  PROCEED_TO_BID,
+  SUBMIT_ENVELOPE_A,
+  SUBMIT_ENVELOPE_B,
+  SUBMIT_ENVELOPE_FILE_A,
+  SUBMIT_ENVELOPE_FILE_B
 };
 

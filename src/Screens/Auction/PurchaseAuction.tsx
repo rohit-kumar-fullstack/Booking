@@ -38,7 +38,6 @@ const PurchaseAuction = () => {
 
         return now.isAfter(end);
     }
-    console.log(allBoolean);
 
     return (
         <View style={{ flex: 1 }}>
