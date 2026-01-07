@@ -38,6 +38,7 @@ const Login = () => {
     mutate({ password: values.password, emailAdd: values.email }, {
       onSuccess: (res) => {
         if (res.statusCode == 200) {
+          console.log("login token : ", res)
           Dispatch(setToken({ ...res.data, token: res.token }))
           Navigation.dispatch(
             CommonActions.reset({

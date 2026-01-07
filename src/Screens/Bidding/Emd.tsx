@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Alert } from 'react-native';
 import { pick } from '@react-native-documents/picker';
 import Animated, { FadeInDown, FadeOutUp, Layout } from 'react-native-reanimated';
-import BouncyCheckbox from 'react-native-bouncy-checkbox';
+// import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { InsideHeader, Skelton } from '../../Component/Index';
 import colors from '../../Constant/Color';
 import EmdComplete from './Component/EmdComplete';
@@ -111,14 +111,14 @@ const Emd = () => {
                         <Text style={styles.subText}>EMD ₹ {item.emdAmount}</Text>
                     </View>
 
-                    <BouncyCheckbox
+                    {/* <BouncyCheckbox
                         size={20}
                         fillColor={colors.primary}
                         iconStyle={{ borderRadius: 5, borderWidth: 1.5, borderColor: colors.primary }}
                         innerIconStyle={{ borderRadius: 6 }}
                         isChecked={selected}
                         onPress={(checked) => toggleSelect(item, checked)}
-                    />
+                    /> */}
                 </View>
 
                 <Text style={styles.meta}>
@@ -181,7 +181,7 @@ const Emd = () => {
                     />
 
                     <View style={styles.bottom}>
-                        <BouncyCheckbox
+                        {/* <BouncyCheckbox
                             size={18}
                             fillColor={colors.primary}
                             iconStyle={{ borderRadius: 5, borderWidth: 1.5, borderColor: colors.primary }}
@@ -190,7 +190,7 @@ const Emd = () => {
                             onPress={() => setAcceptedPolicy(p => !p)}
                             text="I agree to Terms & Privacy Policy"
                             textStyle={styles.policyText}
-                        />
+                        /> */}
 
                         <TouchableOpacity
                             style={[

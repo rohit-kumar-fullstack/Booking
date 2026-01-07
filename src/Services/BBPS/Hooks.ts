@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
-import { fetchDashboard, fetchLiveAuction, fetchLiveTender, fetchPurchaseAuction, fetchPurchaseTender, offlineAuctionPurchase, userLogin } from './apis';
+import { fetchDashboard, fetchLiveAuction, fetchLiveTender, fetchPurchaseAuction, fetchPurchaseTender, offlineAuctionPurchase, userLogin, offlineTenderPurchase, fetchTenderById } from './apis';
 
 // User
 
@@ -19,23 +19,45 @@ export const useDashboard = () => {
 
 // Auction & Tender
 
-export const useFetchPurchaseTender = () => {
+export const useFetchPurchaseTender = (size: number) => {
     return useQuery({
-        queryKey: [],
-        queryFn: () => fetchPurchaseTender()
+        queryKey: ['purchaseTender', size],
+        queryFn: () => fetchPurchaseTender({ page: 0, size }),
     });
 };
 
+
+
 export const useFetchLiveTender = () => {
     return useQuery({
-        queryKey: [],
+        queryKey: ['fetchLiveTender',],
         queryFn: () => fetchLiveTender()
     });
 };
 export const useFetchPurchaseAuction = () => {
     return useQuery({
         queryKey: ['fetchPurchaseAuction',],
-        queryFn: () => fetchPurchaseAuction()
+         queryFn: ({ pageParam = 1 }) =>
+            fetchPurchaseAuction({
+                page: pageParam,
+                    size: 10,
+                }),
+        getNextPageParam: (lastPage: any) => {
+            const { page, size, totalCount } = lastPage;
+            const totalPages = Math.ceil(totalCount / size);
+            const nextPage = page + 1;
+            return nextPage < totalPages ? nextPage : undefined;
+        },
+        select: (data) => {
+
+            const mergedResults = data.pages.flatMap((page: any) => page.data ?? []);
+
+            console.log("mergedResults for tender : ", mergedResults)
+            return {
+                ...data,
+                result: mergedResults,
+            };
+        },
     });
 };
 
@@ -75,3 +97,17 @@ export const useOfflineAuctionPurchase = () => {
         mutationFn: (payload: any) => offlineAuctionPurchase(payload),
     });
 };
+export const useOfflineTenderPurchase = () => {
+    return useMutation({
+        mutationFn: (payload: any) => offlineTenderPurchase(payload),
+    });
+};
+
+export const useFetchTenderById = (tenderId: string) => {
+    return useQuery({
+        queryKey: ['fetchTenderById', tenderId],
+        queryFn: () => fetchTenderById(tenderId)
+    });
+}
+
+

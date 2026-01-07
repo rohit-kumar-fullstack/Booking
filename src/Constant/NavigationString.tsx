@@ -8,6 +8,9 @@ const NavigationString = {
     PurchaseList: 'PurchaseList',
     Emd: 'Emd',
     StartBidding: 'StartBidding',
-    PurchaseAuctionList:'PurchaseAuctionList'
+    PurchaseAuctionList:'PurchaseAuctionList',
+    // tender
+    PurchaseTenderList:'PurchaseTenderList',
+    ProceedToPurTender:'ProceedToPurTender',
 }
 export default NavigationString

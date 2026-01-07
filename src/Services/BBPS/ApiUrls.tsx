@@ -32,6 +32,7 @@ const PROCEED_PURCHASE_AUCTION = `${BASE_URL_Auction}api/auction/proceedToPurcha
 const PURCHASE_AUCTION = `${BASE_URL_Auction}api/auction/purchaseAuction`
 const PURCHASE_OFFLINE_AUCTION = `${BASE_URL_Auction}api/auction/purchaseAuctionOffline`
 const PURCHASE_TENDER = `https://procurelinc.in/EProcurementSB/tenderPayment/purchaseTender`
+const PURCHASE_TENDER_OFFLINE = `https://procurelinc.in/EProcurementSB/tenderPayment/purchaseTenderOffline`
 const AUCTION_PURCHASE_STATUS = `https://api.godemo.in/Auction/api/auction/transactionStatus?orderNo=`
 const GET_TENDER_DETAILS = `${BASE_URL}eTendering/getTenderById?tenderId=`
 const GET_DOCID = `${BASE_URL}eTendering/download/docId?docId=`
@@ -61,6 +62,11 @@ const ITEM_DOCUMENT_DOWNLOAD = `${BASE_URL_Auction}api/auction/home/downloadDocu
 
 // Rohit
 const DASHBOARD_COUNT = `${BASE_URL_Auction}api/auction/home/dashboard/counts`
+
+//tender 
+
+const TENDER_LOGIN = `${BASE_URL}eproc/loginWithoutDecryption`
+
 
 export {
   // Rohit
@@ -118,6 +124,8 @@ export {
   AUCTION_LOGIN,
   TWO_FACTOR_AUTH,
   GET_MASTER_DATA,
-  PURCHASE_OFFLINE_AUCTION
+  PURCHASE_OFFLINE_AUCTION,
+  TENDER_LOGIN,
+  PURCHASE_TENDER_OFFLINE,
 };
 

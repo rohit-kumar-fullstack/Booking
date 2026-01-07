@@ -13,6 +13,7 @@ export const apiCall = async <R, D = {}>(
   try {
     const token: any = store.getState().token.token;
 
+    console.log("token : ", token)
     const response = await axios({
       method,
       url,
@@ -25,7 +26,7 @@ export const apiCall = async <R, D = {}>(
         'Content-Type': contentType || 'application/json',
       },
     });
-
+    console.log("url : ", url)
     return response.data;
   } catch (error: any) {
     const errorMessage = error?.response?.data?.error;
