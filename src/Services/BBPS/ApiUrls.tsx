@@ -40,7 +40,7 @@ const GET_DOCID = `${BASE_URL}eTendering/download/docId?docId=`
 const DOWNLOAD_DOC = `${BASE_URL}eTendering/download/docId?docId=`
 const TWO_FACTOR_AUTH = `${BASE_URL}contractor/two-factor-auth?status=`
 const AUCTION_LOGIN = `https://api.godemo.in/Auction/auction/loginWithoutDecryption`
-const GET_AUCTION_DETAILS = `${BASE_URL_Auction}api/auction/getAuction/id?id=`
+const GET_AUCTION_DETAILS = `${BASE_URL_Auction}api/auction/getAuction/id`
 const TANDER_PURCHASE_STATUS = `https://procurelinc.in/EProcurementSB/tenderPayment/transactionStatus?orderNo=`
 const GET_MY_AUCTION = `${BASE_URL_Auction}api/auction/getMyAuction`
 const GET_MY_TENDER = "https://procurelinc.in/EProcurementSB/tenderBidding/getAllPurchasedTendersByConId"
@@ -61,10 +61,12 @@ const ITEM_DOCUMENT_DOWNLOAD = `${BASE_URL_Auction}api/auction/home/downloadDocu
 
 // Rohit
 const DASHBOARD_COUNT = `${BASE_URL_Auction}api/auction/home/dashboard/counts`
+const AUCTION_ONE_TIME_BID =`${BASE_URL_Auction}api/bidding/getBidForAuction`
 
 export {
   // Rohit
   DASHBOARD_COUNT,
+  AUCTION_ONE_TIME_BID,
   ITEM_DOCUMENT_DOWNLOAD,
   ITEM_DETAIL,
   TECHNICAL_DOCUMENT_SUBMIT,

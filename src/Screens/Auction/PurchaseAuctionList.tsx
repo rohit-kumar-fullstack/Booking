@@ -3,8 +3,12 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react
 import { InsideHeader, Loader } from '../../Component/Index';
 import colors from '../../Constant/Color';
 import { CreditCard, Calendar, User, DollarSign, ArrowRight } from 'lucide-react-native';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useOfflineAuctionPurchase } from '../../Services/BBPS/Hooks';
+import { showSuccessAlert } from '../../Constant/ShowDailog';
+import { clearPurchaseAuction } from '../../Redux/Slices/selectPurchaseAuction';
+import { CommonActions, useNavigation } from '@react-navigation/native';
+import NavigationString from '../../Constant/NavigationString';
 
 const dummyAuctionList = [
     {
@@ -46,11 +50,11 @@ const dummyAuctionList = [
 ];
 
 const PurchaseAuctionList = () => {
+    const Navigation = useNavigation()
+    const Dispatch = useDispatch()
     const [loading, setLoading] = useState(false);
     const [list, setList] = useState(dummyAuctionList);
     const SelectedPurchaseList = useSelector((state: any) => state.selectPurchaseAuction);
-    console.log(SelectedPurchaseList,'iiiiiiiiiiiiiiiiiiiiiiii');
-    
     const { mutate, isPending } = useOfflineAuctionPurchase()
     const calculateTotalAmount = (item: any) => {
         const gstAmount =
@@ -80,10 +84,18 @@ const PurchaseAuctionList = () => {
         };
 
         try {
-            // console.log(body);
             mutate(body, {
                 onSuccess: (res) => {
-                    console.log(res, '---------------------purchsase response');
+                    if (res.statusCode == 200) {
+                        showSuccessAlert(res.message)
+                        Dispatch(clearPurchaseAuction())
+                        Navigation.dispatch(
+                            CommonActions.reset({
+                                index: 0,
+                                routes: [{ name: NavigationString.Home }],
+                            })
+                        );
+                    }
                 },
                 onError: (error) => {
                     console.log(error, "================purchse Error");
@@ -167,16 +179,16 @@ const PurchaseAuctionList = () => {
                     style={[styles.button, { marginLeft: 8 }]}
                     onPress={() => handlePurchase('offline')}
                 >
-                    <Text style={styles.buttonText}>Purchase Offline</Text>
-                    <ArrowRight size={18} color="#fff" style={{ marginLeft: 6 }} />
+                    {
+                        isPending ? <Loader size='small' color={colors.white} /> : <>
+                            <Text style={styles.buttonText}>Purchase Offline</Text>
+                            <ArrowRight size={18} color="#fff" style={{ marginLeft: 6 }} />
+                        </>
+                    }
+
                 </TouchableOpacity>
             </View>
 
-            {loading && (
-                <View style={styles.loadingOverlay}>
-                    <Loader />
-                </View>
-            )}
         </View>
     );
 };

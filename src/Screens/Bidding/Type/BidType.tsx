@@ -16,3 +16,20 @@ export type allBooleanType = {
   acitveItemData: any
   timeEnd: boolean
 }
+export interface Props {
+  visible: boolean
+  setAllBoolean: any
+  allBoolean: any
+  template: any
+}
+
+
+export type SelectedItem = {
+    auctionItemId: number;
+    productImageName: string;
+    file: {
+        name: string;
+        uri: string;
+        type: string;
+    } | null;
+};

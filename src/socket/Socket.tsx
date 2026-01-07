@@ -51,8 +51,8 @@ const reducer = (state: State, action: Action): State => {
 export const useWebSocketService = (
   webSocketUrl: string,
   onConnectCallback: () => void,
-  onErrorCallback: (error: string) => void
-) => {
+  onErrorCallback: (error: string) => void,
+  Token: any) => {
   const [state, dispatch] = useReducer(reducer, {
     client: null,
     subscriptions: new Map(),
@@ -84,7 +84,7 @@ export const useWebSocketService = (
 
       onConnect: () => {
         isConnected.current = true;
-        console.log('✅ WebSocket connected');
+        // console.log('✅ WebSocket connected');
 
         // 🔁 Flush queued subscriptions
         pendingSubscriptions.current.forEach(sub =>
@@ -111,7 +111,7 @@ export const useWebSocketService = (
 
       // 🧠 Queue if not connected
       if (!client || !isConnected.current) {
-        console.log('⏳ Queued subscription:', destination);
+        // console.log('⏳ Queued subscription:', destination);
         pendingSubscriptions.current.push({ destination, callback });
         return;
       }
@@ -123,7 +123,6 @@ export const useWebSocketService = (
 
         try {
           const parsed = JSON.parse(message.body);
-          console.log('📡 LIVE DATA:', parsed);
           callback(parsed);
         } catch (e) {
           console.error('❌ JSON parse error', e);
@@ -151,7 +150,6 @@ export const useWebSocketService = (
 
   // ================= ROOM =================
   const createRoom = async (roomId: any) => {
-    const Token = useSelector((prev: any) => prev.token.token)
     if (!roomId) return;
 
     try {
@@ -160,7 +158,7 @@ export const useWebSocketService = (
         null,
         {
           params: { roomId },
-          headers: { Authentication: `Bearer ${Token.token}` },
+          headers: { Authentication: `Bearer ${Token}` },
         }
       );
 
@@ -175,11 +173,11 @@ export const useWebSocketService = (
   };
 
   const joinRoom = async (roomId: any) => {
-    const Token = useSelector((prev: any) => prev.token.token)
+
     try {
       const { data } = await axios.get(
         `${Variables.socketUrl}livebidding/joinRoom?roomId=${roomId}`,
-        { headers: { Authentication: `Bearer ${Token.token}` } }
+        { headers: { Authentication: `Bearer ${Token}` } }
       );
 
       if (data.statusCode === 200) return data.data.bids;
@@ -190,17 +188,17 @@ export const useWebSocketService = (
 
   // ================= BID =================
   const placeBid = async (BidDTO: any) => {
-    const Token = useSelector((prev: any) => prev.token.token)
+
     try {
       const res = await axios.post(
         `${Variables.socketUrl}livebidding/placeBid`,
         BidDTO,
-        { headers: { Authentication: `Bearer ${Token.token}` } }
+        { headers: { Authentication: `Bearer ${Token}` } }
       );
 
       if (res.data.statusCode === 200) {
         showSuccessAlert(res.data.message);
-        return { data: res.data.data, status: true };
+        return { data: res.data.data, status: true, message: res.data.message };
       }
     } catch (err: any) {
       if (err?.response?.data?.statusCode === 400) {

@@ -1,17 +1,7 @@
 import React, { useState, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-  Dimensions,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { InsideHeader } from '../../Component/Index';
-import {
-  useFetchLiveAuction,
-  useFetchPurchaseAuction,
-} from '../../Services/BBPS/Hooks';
+import { useFetchLiveAuction, useFetchPurchaseAuction } from '../../Services/BBPS/Hooks';
 import colors from '../../Constant/Color';
 import LiveAuction from './LiveAuction';
 import PurchaseAuction from './PurchaseAuction';
@@ -20,7 +10,6 @@ import { useNavigation } from '@react-navigation/native';
 import NavigationString from '../../Constant/NavigationString';
 import FontsFamily from '../../Constant/FontsFamily';
 import { useSelector } from 'react-redux';
-const { width } = Dimensions.get('screen')
 const TAB_WIDTH = 140;
 const TAB_HEIGHT = 44;
 
@@ -29,7 +18,6 @@ const Auction = () => {
   const { data: liveAuctionData = {} }: any = useFetchLiveAuction();
   const { data: purchaseAuctionData = {} } = useFetchPurchaseAuction();
   const SelectedPurchaseList = useSelector((state: any) => state.selectPurchaseAuction);
-
 
   const liveCount = Array.isArray(liveAuctionData?.result)
     ? liveAuctionData?.pages[0]?.totalCount
@@ -101,7 +89,7 @@ const Auction = () => {
         </View>
         {/* Cart */}
         <View>
-          {SelectedPurchaseList.length && <View style={{ borderWidth: 2, borderColor: colors.white, backgroundColor: colors.primaryLight, position: 'absolute', borderRadius: 50, zIndex: 20, right: 0, top: -10, paddingHorizontal:2 }}>
+          {SelectedPurchaseList.length && <View style={{ borderWidth: 2, borderColor: colors.white, backgroundColor: colors.primaryLight, position: 'absolute', borderRadius: 50, zIndex: 20, right: 0, top: -10, paddingHorizontal: 2 }}>
             <Text style={{ fontSize: 12, color: colors.black }}>{SelectedPurchaseList.length}</Text>
           </View>}
           <TouchableOpacity style={{ padding: 10, backgroundColor: colors.primaryLight, borderRadius: 20 }} onPress={() => { Navigation.navigate(NavigationString.PurchaseList) }}>

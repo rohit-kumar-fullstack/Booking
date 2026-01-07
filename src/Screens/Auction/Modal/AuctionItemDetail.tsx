@@ -79,13 +79,16 @@ const AuctionItemDetail: React.FC<Props> = ({ visible, onClose, data = ITEM_DUMM
         <Modal
             isVisible={visible}
             style={styles.fullModal}
-            animationIn="slideInUp"
-            animationOut="slideOutDown"
-            backdropOpacity={1}
-            useNativeDriver
+            animationIn="fadeIn"
+            animationOut="fadeOut"
+            animationInTiming={360}
+            animationOutTiming={280}
             statusBarTranslucent
+            backdropColor="transparent"
+            backdropOpacity={0}
+            useNativeDriver
         >
-            <SafeAreaView style={styles.safeArea}>
+            <View style={styles.safeArea}>
 
                 {/* Navbar */}
                 <View style={[styles.header, { paddingTop: inset.top }]}>
@@ -171,7 +174,7 @@ const AuctionItemDetail: React.FC<Props> = ({ visible, onClose, data = ITEM_DUMM
                     </Section>
 
                 </ScrollView>
-            </SafeAreaView>
+            </View>
         </Modal>
     );
 };

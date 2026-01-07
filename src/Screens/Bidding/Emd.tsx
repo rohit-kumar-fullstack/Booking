@@ -1,37 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Alert } from 'react-native';
 import { pick } from '@react-native-documents/picker';
 import Animated, { FadeInDown, FadeOutUp, Layout } from 'react-native-reanimated';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
-import { InsideHeader, Skelton } from '../../Component/Index';
+import { InsideHeader, Loader, Skelton } from '../../Component/Index';
 import colors from '../../Constant/Color';
 import EmdComplete from './Component/EmdComplete';
 import NavigationString from '../../Constant/NavigationString';
 import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { useAuctionItem, useEmdCheck } from '../../Services/BBPS/Hooks';
+import { apiCall } from '../../Axios/Axios';
+import { AUCTION_ITEM_SUBMIT, CHECK_TECHNICAL_DOCUMENTAION, GET_TECHNICAL_DOCUMENTAION } from '../../Services/BBPS/ApiUrls';
+import TemplateFormModal from './Component/TemplateFormModal';
+import { SelectedItem } from './Type/BidType';
 
-const DUMMY_AUCTION_ITEMS = [
-    { id: 1, productName: 'Iron Scrap Lot A', emdAmount: 50000, itemDocumentName: null },
-    { id: 2, productName: 'Steel Rods Lot B', emdAmount: 75000, itemDocumentName: 'old_emd.pdf' },
-    { id: 3, productName: 'Copper Wire Lot C', emdAmount: 60000, itemDocumentName: null },
-];
-
-type SelectedItem = {
-    auctionItemId: number;
-    productImageName: string;
-    file: {
-        name: string;
-        uri: string;
-        type: string;
-    } | null;
-};
 
 const Emd = () => {
     const Navigation: any = useNavigation()
+    const SelectedAuction = useSelector((state: any) => state.auction.auction)
     const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
     const [acceptedPolicy, setAcceptedPolicy] = useState(false);
-    const [isComplete, setIsComplete] = useState(false);
+    const [allBoolean, setAllBoolean] = useState({ isSubmitEmdLoading: false, isEmdComplete: false, auctionItems: [], technicalDocumentStatus: false, selectTemplate: {}, technicalDocModalVisible: false })
+    const { mutate } = useEmdCheck()
+    const { mutate: AuctionItemMutate, isPending } = useAuctionItem()
 
-    /* ---------------- Helpers ---------------- */
     const isSelected = (id: number) => selectedItems.some(i => i.auctionItemId === id);
 
     const toggleSelect = (item: any, checked: boolean) => {
@@ -70,27 +63,6 @@ const Emd = () => {
     };
 
 
-    const handleSubmit = () => {
-        if (!acceptedPolicy) {
-            Alert.alert('Policy Required', 'Please accept terms');
-            return;
-        }
-
-        if (selectedItems.length === 0) {
-            Alert.alert('Select Item', 'Please select at least one item');
-            return;
-        }
-
-        for (const item of selectedItems) {
-            if (!item.productImageName || !item.file) {
-                Alert.alert('Incomplete', 'Upload documents for all selected items');
-                return;
-            }
-        }
-
-        console.log('✅ SUBMITTED:', selectedItems);
-        setIsComplete(true);
-    };
 
     /* ---------------- Render Item ---------------- */
     const renderItem = ({ item }: any) => {
@@ -141,6 +113,7 @@ const Emd = () => {
                                 updateSelectedItem(item.id, { productImageName: text })
                             }
                             style={styles.input}
+                            placeholderTextColor={colors.lightText}
                         />
 
                         <TouchableOpacity
@@ -163,19 +136,197 @@ const Emd = () => {
         );
     };
 
+    // Api calls
+    const getAuctionItem = async () => {
+        try {
+            setAllBoolean((prev: any) => ({ ...prev, isLoading: true }))
+            if (SelectedAuction.auctionPattern === 'Forward') {
+                const payload = { auctionNumber: SelectedAuction.auctionNumber, status: 'Forward' }
+                AuctionItemMutate(payload, {
+                    onSuccess: (res) => {
+                        if (res.statusCode == 200) {
+                            setAllBoolean((prev: any) => ({ ...prev, auctionItems: Array.isArray(res?.data) ? res.data : [res.data] }))
+                        }
+                    },
+                    onError: (err) => {
+
+                    }
+                })
+
+            } else if (SelectedAuction.auctionPattern === 'Reverse') {
+                const payload = { auctionNumber: SelectedAuction.auctionNumber, status: 'Reverse' }
+                AuctionItemMutate(payload, {
+                    onSuccess: (res) => {
+                        if (res.statusCode == 200) {
+                            setAllBoolean((prev: any) => ({ ...prev, auctionItems: Array.isArray(res?.data) ? res.data : [res.data] }))
+                        }
+                    },
+                    onError: (err) => {
+
+                    }
+                })
+
+            }
+        } catch (error) {
+            console.log('Auction fetch error', error)
+        } finally {
+            setAllBoolean((prev: any) => ({ ...prev, isLoading: false }))
+        }
+    }
+
+    const getTemplateDocumentation = async () => {
+        try {
+            if (SelectedAuction.technicalDocReq) {
+                const res = await apiCall<any>('get', CHECK_TECHNICAL_DOCUMENTAION, {}, { auctionId: SelectedAuction.auctionId })
+
+                if (res.data) {
+                    setAllBoolean((prev: any) => ({ ...prev, technicalDocumentStatus: true }))
+                } else {
+                    const res = await apiCall<any>('get', GET_TECHNICAL_DOCUMENTAION,)
+                    const auctionIdToFind = String(SelectedAuction.auctionId);
+                    const matchedObject = res.data.find((item: any) =>
+                        item.auctionIds
+                            .split(',')
+                            .map((id: any) => id.trim())
+                            .includes(auctionIdToFind)
+                    );
+                    setAllBoolean((prev: any) => ({ ...prev, selectTemplate: matchedObject, technicalDocModalVisible: true }))
+                }
+            }
+
+
+        } catch (error) {
+            console.log('Auction fetch error', error)
+        } finally {
+            setAllBoolean((prev: any) => ({ ...prev, isLoading: false }))
+        }
+    }
+
+    const AlreadyEmdCheck = async () => {
+        try {
+            mutate({ auctionNumber: SelectedAuction.auctionNumber }, {
+                onSuccess: (res => {
+                    console.log(SelectedAuction.auctionNumber, res , SelectedAuction,'iiiiiiiiiiiiiiiiiiiiiiiii');
+                    
+                    if (res.statusCode == 200) {
+                        if (res.message == 'No EMD Documents') {
+                            setAllBoolean((prev: any) => ({ ...prev, isEmdComplete: false }))
+                            getAuctionItem()
+                        } else {
+                            if (!SelectedAuction.technicalDocReq) {
+                                setAllBoolean((prev: any) => ({ ...prev, isEmdComplete: true, technicalDocumentStatus: true }))
+                            } else {
+                                setAllBoolean((prev: any) => ({ ...prev, isEmdComplete: true }))
+                                getTemplateDocumentation()
+                            }
+
+                        }
+                    }
+                }),
+                onError: (err) => {
+
+                }
+            })
+        } catch (error) {
+            console.log('EMD Check Error:', error)
+        } finally {
+            setAllBoolean((prev: any) => ({ ...prev, isLoading: false }))
+        }
+    }
+
+    const handleSubmit = async () => {
+        setAllBoolean((prev: any) => ({ ...prev, isSubmitEmdLoading: true }))
+        if (!acceptedPolicy) {
+            Alert.alert('Policy Required', 'Please accept terms');
+            return;
+        }
+
+        if (selectedItems.length === 0) {
+            Alert.alert('Select Item', 'Please select at least one item');
+            return;
+        }
+
+        for (const item of selectedItems) {
+            if (!item.productImageName || !item.file) {
+                Alert.alert('Incomplete', 'Upload documents for all selected items');
+                return;
+            }
+        }
+        try {
+            const formData = new FormData()
+
+            formData.append('auctionId', String(SelectedAuction.auctionId))
+
+            selectedItems.forEach((item: any) => {
+                formData.append(
+                    'auctionItemId',
+                    String(item.auctionItemId)
+                )
+
+                formData.append(
+                    'productImageName',
+                    item.productImageName
+                )
+
+                formData.append('files', {
+                    uri: item.file.uri,
+                    name: item.file.name,
+                    type: item.file.type || 'application/pdf',
+                } as any)
+            })
+
+            const res = await apiCall<any>('post', AUCTION_ITEM_SUBMIT, formData, {}, 'multipart/form-data')
+            if (res.statusCode == 200) {
+                if (SelectedAuction.technicalDocReq) {
+                    getTemplateDocumentation()
+                } else {
+                    if (SelectedAuction.auctionPattern === 'Forward') {
+                        Navigation.navigate(NavigationString.StartBidding)
+                    } else {
+                        Navigation.navigate(NavigationString.StartReverseBidding)
+                    }
+                }
+            }
+        } catch (error) {
+            console.log('Submit error', error)
+            Alert.alert('Error', 'Failed to submit EMD')
+        } finally {
+            setAllBoolean((prev: any) => ({ ...prev, isSubmitEmdLoading: true }))
+        }
+    };
+
+    const EmdContinueHandle = async () => {
+
+        if (allBoolean.technicalDocumentStatus) {
+            if (SelectedAuction.auctionPattern === 'Forward') {
+                Navigation.navigate(NavigationString.StartBidding)
+            } else {
+                Navigation.navigate(NavigationString.StartReverseBidding)
+            }
+        } else {
+            getTemplateDocumentation()
+        }
+    }
+    useEffect(() => {
+        AlreadyEmdCheck()
+    }, [])
+
     return (
         <View style={{ flex: 1, backgroundColor: colors.white }}>
             <InsideHeader title="EMD Submission" showArrow />
             <View style={styles.container}>
+                {SelectedAuction.technicalDocReq && allBoolean.technicalDocModalVisible &&
+                    <TemplateFormModal visible={allBoolean.technicalDocModalVisible} allBoolean={allBoolean} setAllBoolean={setAllBoolean} template={allBoolean.selectTemplate} />
+                }
 
-                {false ? (
+                {isPending ? (
                     <Skelton />
-                ) : true ? (
-                    <EmdComplete onNext={() => { Navigation.navigate(NavigationString.StartBidding) }} />
+                ) : allBoolean.isEmdComplete ? (
+                    <EmdComplete onNext={EmdContinueHandle} />
                 ) : <>
                     <FlatList
-                        data={DUMMY_AUCTION_ITEMS}
-                        keyExtractor={item => item.id.toString()}
+                        data={allBoolean.auctionItems}
+                        keyExtractor={(item: any) => item.auctionId}
                         renderItem={renderItem}
                         contentContainerStyle={{ paddingBottom: 170 }}
                     />
@@ -200,7 +351,10 @@ const Emd = () => {
                             onPress={handleSubmit}
                             disabled={!acceptedPolicy}
                         >
-                            <Text style={styles.submitText}>Submit EMD</Text>
+                            {
+                                allBoolean.isSubmitEmdLoading ? <Loader size='small' color={colors.white} /> : <Text style={styles.submitText}>Submit EMD</Text>
+                            }
+
                         </TouchableOpacity>
                     </View>
                 </>
@@ -277,6 +431,7 @@ const styles = StyleSheet.create({
         padding: 12,
         backgroundColor: '#FFFFFF',
         fontSize: 14,
+        color: colors.black
     },
 
     uploadBtn: {

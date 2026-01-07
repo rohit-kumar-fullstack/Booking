@@ -3,6 +3,7 @@ import PurchaseAuctionList from "./Auction/PurchaseAuctionList";
 import PurchaseList from "./Auction/PurchaseList";
 import Emd from "./Bidding/Emd";
 import StartBidding from "./Bidding/StartBidding";
+import StartReverseBidding from "./Bidding/StartReverseBidding";
 import Home from "./Home/Home";
 import Login from "./Login/Login";
 import Onboarding from "./Onboarding/Onboarding";
@@ -20,6 +21,7 @@ const Screens = {
     PurchaseList,
     Emd,
     StartBidding,
-    PurchaseAuctionList
+    PurchaseAuctionList,
+    StartReverseBidding
 }
 export default Screens

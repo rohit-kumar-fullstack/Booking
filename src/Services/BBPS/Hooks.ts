@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
-import { fetchDashboard, fetchLiveAuction, fetchLiveTender, fetchPurchaseAuction, fetchPurchaseTender, offlineAuctionPurchase, userLogin } from './apis';
+import { fetchAuctionItem, fetchDashboard, fetchEmdCheck, fetchLiveAuction, fetchLiveTender, fetchPurchaseAuction, fetchPurchaseTender, offlineAuctionPurchase, userLogin } from './apis';
 
 // User
 
@@ -73,5 +73,18 @@ export const useFetchLiveAuction = () => {
 export const useOfflineAuctionPurchase = () => {
     return useMutation({
         mutationFn: (payload: any) => offlineAuctionPurchase(payload),
+    });
+};
+
+// EMD
+export const useEmdCheck = () => {
+    return useMutation({
+        mutationFn: (payload: any) => fetchEmdCheck(payload),
+    });
+};
+
+export const useAuctionItem = () => {
+    return useMutation({
+        mutationFn: (payload: any) => fetchAuctionItem(payload),
     });
 };

@@ -50,7 +50,7 @@ const InsideHeader: React.FC<HeaderProps> = ({ title, showArrow = false }) => {
                     <Text style={styles.title}>{title}</Text>
                 </View>
 
-                <TouchableOpacity onPress={() => { navigation.navigate(NavigationString.Emd) }}>
+                <TouchableOpacity onPress={() => { navigation.navigate(NavigationString.Home) }}>
                     <Image
                         source={ImagePath.Icon.Logo2}
                         style={styles.logo}

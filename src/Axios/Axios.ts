@@ -19,7 +19,7 @@ export const apiCall = async <R, D = {}>(
       data,
       params,
       // withCredentials: true,
-      baseURL: Variable.Main_Base,
+      // baseURL: Variable.Main_Base,
       headers: {
         Authentication: `Bearer ${token?.token}`,
         'Content-Type': contentType || 'application/json',
@@ -30,7 +30,6 @@ export const apiCall = async <R, D = {}>(
   } catch (error: any) {
     const errorMessage = error?.response?.data?.error;
     { error?.response?.data?.error && showErrorAlert(error?.response?.data?.error || '') }
-    console.log(errorMessage, '---------------url error');
 
     if (error?.response?.status === 401) {
       store.dispatch(setToken({}));

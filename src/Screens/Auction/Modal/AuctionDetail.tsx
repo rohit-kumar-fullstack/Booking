@@ -1,30 +1,8 @@
 import React, { memo, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  SafeAreaView,
-  Platform,
-  StatusBar,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Platform, StatusBar } from 'react-native';
 import Modal from 'react-native-modal';
 import moment from 'moment';
-import {
-  X,
-  Hash,
-  Briefcase,
-  Calendar,
-  CreditCard,
-  FileText,
-  Download,
-  Eye,
-  Layers,
-  ArrowLeft,
-  Info,
-  Clock
-} from 'lucide-react-native';
+import { Briefcase, Calendar, FileText, Download, Eye, Layers, ArrowLeft, Clock } from 'lucide-react-native';
 import colors from '../../../Constant/Color';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AuctionItemDetail from './AuctionItemDetail';
@@ -69,13 +47,15 @@ const AuctionFullDetail: React.FC<Props> = ({ visible, onClose, data }) => {
     <Modal
       isVisible={visible}
       style={styles.fullModal}
-      animationIn="slideInRight"
-      animationOut="slideOutRight"
-      useNativeDriver
-      hideModalContentWhileAnimating
+      animationIn="fadeIn"
+      animationOut="fadeOut"
+      animationInTiming={360}
+      animationOutTiming={280}
       statusBarTranslucent
+      backdropColor="transparent"
+      backdropOpacity={0}
     >
-      <SafeAreaView style={styles.safeArea}>
+      <View style={styles.safeArea}>
         <StatusBar barStyle="dark-content" />
 
         {/* Full Header */}
@@ -191,23 +171,25 @@ const AuctionFullDetail: React.FC<Props> = ({ visible, onClose, data }) => {
             </Text>
           </TouchableOpacity>
         </View>
-        <AuctionItemDetail data={{
-          productName: "sick sari",
-          timeDuration: "112 YEAR",
-          category: "laundry",
-          subCategory: "sari",
-          reservePriceFig: "120000",
-          reservePriceWords: "One Lakh Twenty Thousand",
-          auctionStartFig: "120000",
-          auctionStartWords: "One Lakh Twenty Thousand",
-          bidVariationFig: "200",
-          bidVariationWords: "Two Hundred",
-          emdFig: "2000",
-          emdWords: "Two Thousand",
-          description: "Auction of cars",
-          documentName: "BBPS screens.pdf"
-        }} onClose={() => { setAllBoolean((prev: any) => ({ ...prev, showItemDetail: false })) }} visible={allBoolean.showItemDetail} />
-      </SafeAreaView>
+
+        <AuctionItemDetail
+          data={{
+            productName: "sick sari",
+            timeDuration: "112 YEAR",
+            category: "laundry",
+            subCategory: "sari",
+            reservePriceFig: "120000",
+            reservePriceWords: "One Lakh Twenty Thousand",
+            auctionStartFig: "120000",
+            auctionStartWords: "One Lakh Twenty Thousand",
+            bidVariationFig: "200",
+            bidVariationWords: "Two Hundred",
+            emdFig: "2000",
+            emdWords: "Two Thousand",
+            description: "Auction of cars",
+            documentName: "BBPS screens.pdf"
+          }} onClose={() => { setAllBoolean((prev: any) => ({ ...prev, showItemDetail: false })) }} visible={allBoolean.showItemDetail} />
+      </View>
     </Modal>
   );
 };

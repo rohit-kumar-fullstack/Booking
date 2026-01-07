@@ -36,6 +36,7 @@ export default function MainStack() {
       <Stack.Screen name={NavigationString.Emd} component={Screens.Emd} options={option} />
       <Stack.Screen name={NavigationString.StartBidding} component={Screens.StartBidding} options={option} />
       <Stack.Screen name={NavigationString.PurchaseAuctionList} component={Screens.PurchaseAuctionList} options={option} />
+      <Stack.Screen name={NavigationString.StartReverseBidding} component={Screens.StartReverseBidding} options={option} />
 
     </Stack.Navigator>
   );

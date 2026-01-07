@@ -9,6 +9,9 @@ import { Skelton } from '../../Component/Index';
 import colors from '../../Constant/Color';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectPurchaseAuctionSlice, togglePurchaseAuction } from '../../Redux/Slices/selectPurchaseAuction';
+import { apiCall } from '../../Axios/Axios';
+import { GET_MY_AUCTION, LIVE_AUCTION } from '../../Services/BBPS/ApiUrls';
+import moment from 'moment';
 
 const LiveAuction = () => {
     const navigation: any = useNavigation();
@@ -16,6 +19,7 @@ const LiveAuction = () => {
     const SelectedPurchaseList = useSelector((state: any) => state.selectPurchaseAuction);
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isRefetching, refetch }: any = useFetchLiveAuction();
     const [showRefreshBanner, setShowRefreshBanner] = useState(false);
+    const [allBoolean, setAllBoolean] = useState({ liveAuctionData: [] })
 
     useEffect(() => {
         if (isRefetching) {
@@ -64,6 +68,39 @@ const LiveAuction = () => {
         [SelectedPurchaseList]
     );
 
+    const getMyAuction = async () => {
+        try {
+
+            const res = await apiCall<any>('get', `${GET_MY_AUCTION}`,);
+
+            if (res?.statusCode === 200) {
+                const purchasedIds = new Set(
+                    res.data.map((item: any) => item.auctionId),
+                );
+
+                const filteredLive = data?.result.map((item: any) => ({
+                    ...item,
+                    active: !purchasedIds.has(item.auctionId), // false if match, true otherwise
+                }));
+
+                setAllBoolean(prev => ({
+                    ...prev,
+                    liveAuctionData: filteredLive
+                }));
+            }
+        } catch (error) {
+            console.error('getMyAuction error', error);
+        } finally {
+            setAllBoolean(prev => ({ ...prev, isLoading: false }));
+        }
+    };
+
+    useEffect(() => {
+        if (data?.result?.length > 0) {
+            getMyAuction()
+        }
+    }, [data])
+
     if (isLoading) {
         return <Skelton />;
     }
@@ -110,8 +147,8 @@ const LiveAuction = () => {
             )}
 
             <FlatList
-                data={data?.result ?? []}
-                keyExtractor={(item) => String(item.auctionId)}
+                data={allBoolean.liveAuctionData ?? []}
+                keyExtractor={(item: any) => String(item.auctionNumber)}
                 renderItem={renderItem}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 50, paddingTop: 10 }}

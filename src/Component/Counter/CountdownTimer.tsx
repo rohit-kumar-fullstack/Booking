@@ -2,12 +2,15 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import colors from '../../Constant/Color';
 import moment from 'moment';
+import LottieView from 'lottie-react-native';
 
 interface CountdownTimerProps {
-  endDate: string; // Expected format: "DD-MM-YYYY HH:mm:ss"
+  endDate: string;
+  myStyle?: any
+  size?: number // Expected format: "DD-MM-YYYY HH:mm:ss"
 }
 
-const CountdownTimer: React.FC<CountdownTimerProps> = React.memo(({ endDate }) => {
+const CountdownTimer: React.FC<CountdownTimerProps> = React.memo(({ endDate, myStyle = {}, size = 20 }) => {
   const calculateTimeLeft = useCallback(() => {
     if (!endDate) return null;
 
@@ -43,8 +46,14 @@ const CountdownTimer: React.FC<CountdownTimerProps> = React.memo(({ endDate }) =
 
   return (
     <View style={styles.container}>
-      <Text style={styles.timerText}>
-        {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+      <LottieView
+        source={require('../../lottie/clock.json')}
+        autoPlay
+        loop={true}
+        style={{ width: size, height: size, }}
+      />
+      <Text style={[styles.timerText, myStyle]}>
+        {timeLeft.days}D {timeLeft.hours}H {timeLeft.minutes}M {timeLeft.seconds}S
       </Text>
     </View>
   );
@@ -58,15 +67,18 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: colors.black,
     borderRadius: 25,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+
   },
   timerText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: colors.primary,
+    color: colors.black,
+    paddingLeft: 5
   },
   expiredText: {
     fontSize: 12,

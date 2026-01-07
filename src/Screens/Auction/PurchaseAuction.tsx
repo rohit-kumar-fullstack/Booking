@@ -11,6 +11,7 @@ import { SearchInput } from '../../Component/Serach/SeacrhInput';
 import { Skelton } from '../../Component/Index';
 import { allBooleanProps } from './types/types';
 import FilterModal from './Modal/FilterModal';
+import NavigationString from '../../Constant/NavigationString';
 
 
 const PurchaseAuction = () => {
@@ -38,7 +39,6 @@ const PurchaseAuction = () => {
 
         return now.isAfter(end);
     }
-    console.log(allBoolean);
 
     return (
         <View style={{ flex: 1 }}>
@@ -52,11 +52,10 @@ const PurchaseAuction = () => {
                     <PurchaseAuctionTile
                         item={item}
                         onPressDetails={() => {
-                            navigation.navigate('AuctionDetail', { item, onAddToPurchase: () => { }, routeFrom: 'PurchasedAuction' });
                         }}
                         onStartBidding={() => {
                             Dispatch(setAuction(item))
-                            // navigation.navigate(NavigationString, { data: item })
+                            navigation.navigate(NavigationString.Emd)
                         }}
                         buttonEnable={isAuctionActive(item)}
                         isAuctionEnd={isAuctionEnd(item)}

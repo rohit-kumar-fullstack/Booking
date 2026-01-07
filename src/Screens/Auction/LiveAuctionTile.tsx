@@ -22,89 +22,93 @@ const LiveAuctionTile: React.FC<LiveAuctionTileProps> = ({
   return (
     <View style={styles.cardWrapper}>
       {/* Status Tag */}
-      <View
-        style={[
-          styles.statusTag,
-          { backgroundColor: isPurchased ? colors.error : purchaseEnded ? '#94a3b8' : '#4ade80' },
-        ]}
-      />
 
-      <TouchableOpacity
-        style={styles.container}
-        activeOpacity={0.9}
-        onPress={() => setShowDetail(true)}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.badge}>
-            <Tag size={14} color={colors.primary} />
-            <Text style={styles.badgeText}>#{auctionNumber}</Text>
-          </View>
-          <Text style={styles.priceText}>₹{auctionFees}</Text>
-        </View>
-
-        {/* Work Title */}
-        <Text style={styles.workTitle} numberOfLines={2}>
-          {auctionOfWork ?? 'General Auction Work'}
-        </Text>
-
-        {/* Info Grid */}
-        <View style={styles.infoGrid}>
-          <View style={styles.infoItem}>
-            <Calendar size={16} color="#64748b" />
-            <View style={styles.infoTextGroup}>
-              <Text style={styles.infoLabel}>Start</Text>
-              <Text style={styles.infoValue}>{auctionDispatchDate ?? '-'}</Text>
-            </View>
-          </View>
-
-          <View style={styles.infoItem}>
-            <Calendar size={16} color={purchaseEnded ? "#ef4444" : "#22c55e"} />
-            <View style={styles.infoTextGroup}>
-              <Text style={styles.infoLabel}>Deadline</Text>
-              <Text style={[styles.infoValue, purchaseEnded && { color: '#ef4444' }]}>
-                {moment(purchaseEnd, 'DD-MM-YYYY HH:mm:ss').format('DD MMM, YY')}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Action Bar */}
-        <View style={styles.actionBar}>
-          <TouchableOpacity style={styles.iconBtn} onPress={() => setShowDetail(true)}>
-            <Info size={18} color={colors.primary} />
-            <Text style={styles.iconBtnText}>Details</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.mainButton,
-              purchaseEnded
-                ? styles.btnDisabled
-                : isPurchased
-                  ? styles.btnPurchased
-                  : styles.btnActive,
-            ]}
-            onPress={onPurchasePress}
-            disabled={purchaseEnded}
-          >
-            <Text
+      {
+        !showDetail ?
+          <>
+            <View
               style={[
-                styles.mainButtonText,
-                isPurchased && !purchaseEnded ? { color: colors.white } : { color: '#fff' },
+                styles.statusTag,
+                { backgroundColor: isPurchased ? colors.error : purchaseEnded ? '#94a3b8' : '#4ade80' },
               ]}
+            />
+            <View
+              style={styles.container}
             >
-              {purchaseEnded ? 'Expired' : isPurchased ? 'Remove' : 'Add to Cart'}
-            </Text>
-            {!purchaseEnded && (
-              <ArrowRight size={16} color={isPurchased ? colors.white : '#fff'} />
-            )}
-          </TouchableOpacity>
-        </View>
+              {/* Header */}
+              <View style={styles.header}>
+                <TouchableOpacity style={styles.badge} onPress={() => setShowDetail(true)}>
+                  <Tag size={14} color={colors.primary} />
+                  <Text style={styles.badgeText}>#{auctionNumber}</Text>
+                </TouchableOpacity>
+                <Text style={styles.priceText}>₹{auctionFees}</Text>
+              </View>
 
-        {/* Auction Detail Modal */}
-        <AuctionDetail visible={showDetail} data={data} onClose={() => setShowDetail(false)} />
-      </TouchableOpacity>
+              {/* Work Title */}
+              <Text style={styles.workTitle} numberOfLines={2}>
+                {auctionOfWork ?? 'General Auction Work'}
+              </Text>
+
+              {/* Info Grid */}
+              <View style={styles.infoGrid}>
+                <View style={styles.infoItem}>
+                  <Calendar size={16} color="#64748b" />
+                  <View style={styles.infoTextGroup}>
+                    <Text style={styles.infoLabel}>Start</Text>
+                    <Text style={styles.infoValue}>{auctionDispatchDate ?? '-'}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.infoItem}>
+                  <Calendar size={16} color={purchaseEnded ? "#ef4444" : "#22c55e"} />
+                  <View style={styles.infoTextGroup}>
+                    <Text style={styles.infoLabel}>Deadline</Text>
+                    <Text style={[styles.infoValue, purchaseEnded && { color: '#ef4444' }]}>
+                      {moment(purchaseEnd, 'DD-MM-YYYY HH:mm:ss').format('DD MMM, YY')}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Action Bar */}
+              <View style={styles.actionBar}>
+                <TouchableOpacity style={styles.iconBtn} onPress={() => setShowDetail(true)}>
+                  <Info size={18} color={colors.primary} />
+                  <Text style={styles.iconBtnText}>Details</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.mainButton,
+                    purchaseEnded
+                      ? styles.btnDisabled
+                      : !data.active ? { backgroundColor: 'lightgray' } : isPurchased
+                        ? styles.btnPurchased
+                        : styles.btnActive,
+                  ]}
+                  onPress={onPurchasePress}
+                  disabled={purchaseEnded ? true : data.active ? false : true}
+                >
+                  <Text
+                    style={[
+                      styles.mainButtonText,
+                      isPurchased && !purchaseEnded ? { color: colors.white } : { color: '#fff' },
+                    ]}
+                  >
+                    {purchaseEnded ? 'Expired' : !data.active ? 'Purchased' : isPurchased ? 'Remove' : 'Add to Cart'}
+                  </Text>
+                  {!purchaseEnded && (
+                    <ArrowRight size={16} color={isPurchased ? colors.white : '#fff'} />
+                  )}
+                </TouchableOpacity>
+              </View>
+
+              {/* Auction Detail Modal */}
+            </View>
+          </>
+          : <AuctionDetail visible={showDetail} data={data} onClose={() => setShowDetail(false)} />
+      }
+
     </View>
   );
 };

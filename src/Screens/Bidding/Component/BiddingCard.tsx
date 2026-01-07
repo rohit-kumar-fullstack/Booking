@@ -1,0 +1,218 @@
+import React, { memo, useCallback, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import Animated, { FadeInUp, Layout, interpolate, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import colors from '../../../Constant/Color';
+import AuctionItemDetail from '../../Auction/Modal/AuctionItemDetail';
+import MainStyle from '../../../Styles/MainStyle';
+
+const BiddingCard = ({ item, bidValue, onIncrease, onDecrease, onPlaceBid, SelectedAuction }: any) => {
+    const [showDetail, setShowDetail] = React.useState(false);
+    const isMin = bidValue <= item.bidAmount;
+
+    // 🔒 Persist expand state safely
+    const expandedRef = useRef(false);
+    const animation = useSharedValue(0);
+
+    const toggleExpand = useCallback(() => {
+        expandedRef.current = !expandedRef.current;
+        animation.value = withSpring(expandedRef.current ? 1 : 0, {
+            damping: 15,
+            stiffness: 140,
+        });
+    }, []);
+
+    const bodyStyle = useAnimatedStyle(() => ({
+        height: interpolate(animation.value, [0, 1], [0, 190]),
+        opacity: interpolate(animation.value, [0, 0.5, 1], [0, 0, 1]),
+        marginTop: interpolate(animation.value, [0, 1], [0, 15]),
+    }));
+
+    const arrowStyle = useAnimatedStyle(() => ({
+        transform: [
+            {
+                rotate: `${interpolate(animation.value, [0, 1], [0, 180])}deg`,
+            },
+        ],
+    }));
+
+    return (
+        <View>
+            {
+                !showDetail ? <Animated.View
+                    layout={Layout.springify()}
+                    entering={FadeInUp.delay(100)}
+                    style={[styles.card, styles.leadingCard, { borderColor: item.me ? '#22C55E' : 'red', backgroundColor: item.me ? "#F0FDF4" : '#fdf0f0ff' }]}
+                >
+                    {/* HEADER */}
+                    <TouchableOpacity
+                        activeOpacity={0.7}
+                        onPress={() => { setShowDetail(true) }}
+                        style={styles.cardHeader}
+                    >
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.productName}>{item.productName}</Text>
+                            {/* auctionStartValueFigure */}
+                            <Text style={styles.itemIdText}>
+                                Initial Amt : {item?.auctionStartValueFigure}
+                            </Text>
+                        </View>
+
+                        <TouchableOpacity style={styles.headerRight} onPress={toggleExpand}>
+                            <View style={[MainStyle.flexBetween, { gap: 10 }]}>
+                                <View style={[styles.badge, item.me ? styles.meBadge : styles.liveBadge]}>
+                                    <Text style={[styles.badgeText, item.me ? styles.meText : styles.liveText]}>
+                                        {item.me ? 'LEADING' : 'LIVE'}
+                                    </Text>
+                                </View>
+
+                                <Animated.Text style={[styles.arrow, arrowStyle]}>
+                                    ▼
+                                </Animated.Text>
+                            </View>
+                            <Text style={styles.itemIdText}>
+                                {SelectedAuction?.auctionNumber}
+                            </Text>
+                        </TouchableOpacity>
+
+                    </TouchableOpacity>
+
+                    {/* PRICE INFO */}
+                    <View style={styles.priceRow}>
+                        <View>
+                            <Text style={styles.label}>Current Bid</Text>
+                            <Text style={styles.mainPrice}>₹{item?.bidAmount}</Text>
+                        </View>
+
+                        <View style={{ alignItems: 'flex-end' }}>
+                            <Text style={styles.label}>Increment</Text>
+                            <Text style={styles.incrementText}>
+                                +₹{item.bidVariationValue}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* COLLAPSIBLE BODY */}
+                    <Animated.View style={[styles.collapsibleContainer, bodyStyle]}>
+                        <View style={styles.divider} />
+
+                        <Text style={styles.bidLabel}>Set Your Bid</Text>
+
+                        <View style={styles.stepperContainer}>
+                            <TouchableOpacity
+                                onPress={onDecrease}
+                                disabled={isMin}
+                                style={[styles.stepBtn, isMin && styles.disabledBtn]}
+                            >
+                                <Text style={styles.stepText}>−</Text>
+                            </TouchableOpacity>
+
+                            <View style={styles.inputBox}>
+                                <Text style={styles.currency}>₹</Text>
+                                <Text style={styles.bidValueText}>{bidValue}</Text>
+                            </View>
+
+                            <TouchableOpacity onPress={onIncrease} style={styles.stepBtn}>
+                                <Text style={styles.stepText}>+</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <TouchableOpacity
+                            style={styles.submitBtn}
+                            onPress={onPlaceBid}
+                        // activeOpacity={0.85}
+
+                        >
+                            <Text style={styles.submitBtnText}>Confirm Bid</Text>
+                        </TouchableOpacity>
+                    </Animated.View>
+                </Animated.View>
+                    :
+                    <AuctionItemDetail data={item} onClose={() => { setShowDetail(false) }} visible={showDetail} />
+            }
+
+        </View>
+    )
+};
+
+export default memo(BiddingCard);
+const styles = StyleSheet.create({
+    card: {
+        backgroundColor: '#FFF',
+        borderRadius: 24,
+        padding: 20,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: '#E2E8F0',
+        overflow: 'hidden',
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOpacity: 0.05,
+                shadowRadius: 10,
+            },
+            android: { elevation: 2 },
+        }),
+    },
+    leadingCard: {
+        borderColor: '#22C55E',
+        borderWidth: 2,
+        backgroundColor: '#F0FDF4',
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+    },
+    headerRight: { flexDirection: 'column', alignItems: 'center', gap: 8 },
+    productName: { fontSize: 18, fontWeight: 'bold', color: '#1E293B' },
+    itemIdText: { fontSize: 12, color: '#64748B', marginTop: 2 },
+    badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+    liveBadge: { backgroundColor: '#FEE2E2' },
+    meBadge: { backgroundColor: '#BBF7D0' },
+    badgeText: { fontSize: 10, fontWeight: '900' },
+    liveText: { color: '#EF4444' },
+    meText: { color: '#15803D' },
+    arrow: { fontSize: 10, color: '#94A3B8' },
+    priceRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 },
+    label: {
+        fontSize: 11,
+        color: '#94A3B8',
+        textTransform: 'uppercase',
+        fontWeight: '600',
+    },
+    mainPrice: { fontSize: 22, fontWeight: '900', color: '#0F172A' },
+    incrementText: { fontSize: 16, fontWeight: '700', color: '#3B82F6' },
+    collapsibleContainer: { overflow: 'hidden' },
+    divider: { height: 1, backgroundColor: '#E2E8F0', marginVertical: 10 },
+    bidLabel: { fontSize: 13, fontWeight: '600', color: '#475569', marginBottom: 10 },
+    stepperContainer: { flexDirection: 'row', gap: 12, marginBottom: 20 },
+    stepBtn: {
+        width: 45,
+        height: 45,
+        backgroundColor: colors.primary,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    disabledBtn: { backgroundColor: '#CBD5E1' },
+    stepText: { color: '#FFF', fontSize: 20, fontWeight: 'bold' },
+    inputBox: {
+        flex: 1,
+        height: 45,
+        backgroundColor: '#F1F5F9',
+        borderRadius: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    currency: { fontSize: 16, fontWeight: 'bold', color: '#64748B', marginRight: 4 },
+    bidValueText: { fontSize: 18, fontWeight: '800', color: '#0F172A' },
+    submitBtn: {
+        height: 50,
+        backgroundColor: colors.primary,
+        borderRadius: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    submitBtnText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
+});

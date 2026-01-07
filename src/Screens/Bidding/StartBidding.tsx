@@ -1,154 +1,136 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-  Alert,
-} from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, FlatList, StyleSheet, Platform, Alert, BackHandler, Text } from 'react-native';
 import LottieView from 'lottie-react-native';
-import Animated, {
-  FadeInUp,
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-  Layout,
-  interpolate,
-} from 'react-native-reanimated';
 import { InsideHeader } from '../../Component/Index';
 import colors from '../../Constant/Color';
+import { useWebSocketService } from '../../socket/Socket';
+import Variables from '../../Constant/Variable';
+import { useSelector } from 'react-redux';
+import { apiCall } from '../../Axios/Axios';
+import { FORWARD_AUCTION_ITEM, REVERSE_AUCTION_ITEM, SELECTED_AUCTION_ITEM } from '../../Services/BBPS/ApiUrls';
+import BiddingCard from './Component/BiddingCard';
+import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native';
+import NavigationString from '../../Constant/NavigationString';
+import CountdownTimer from '../../Component/Counter/CountdownTimer';
+import FontsFamily from '../../Constant/FontsFamily';
 
-/* ---------------- Types ---------------- */
-interface AuctionItem {
-  id: number;
-  productName: string;
-  auctionStartValueFigure: number;
-  bidVariationValue: number;
-  bidAmount: number;
-  bidAvilable: number;
-  me: boolean;
-}
+const StartBidding = () => {
+  const SelectedAuction = useSelector((state: any) => state.auction.auction);
+  const loginUser = useSelector((state: any) => state.token.token)
+  const Navigation: any = useNavigation()
+  const [items, setItems] = useState<any>([]);
+  const [bidValues, setBidValues] = useState<Record<number, number>>({});
+  const [allBoolean, setAllBoolean] = useState({ showSuccess: false, showDialog: false, bidPayload: {} })
+  const { subscribe, createRoom, placeBid } = useWebSocketService(
+    Variables.webSocketUrl,
+    () => console.log('Connected!'),
+    (error) => console.log('WebSocket Error:', error),
+    loginUser.token,
+  );
 
-/* ---------------- Dummy Data ---------------- */
-const DUMMY_AUCTION = { auctionNumber: 'AUC-2025-001' };
-const DUMMY_ITEMS: AuctionItem[] = [
-  { id: 1, productName: 'Iron Scrap Lot', auctionStartValueFigure: 20000, bidVariationValue: 500, bidAmount: 20000, bidAvilable: 20000, me: false },
-  { id: 2, productName: 'Steel Rod Bundle', auctionStartValueFigure: 35000, bidVariationValue: 1000, bidAmount: 35000, bidAvilable: 35000, me: true },
-  { id: 3, productName: 'Copper Wire Roll', auctionStartValueFigure: 15000, bidVariationValue: 250, bidAmount: 15000, bidAvilable: 0, me: false },
-];
+  const getAllAcutionItems = async () => {
+    try {
+      const payload = { auctionNumber: SelectedAuction.auctionNumber };
+      let auctionItem: any[] = [];
 
-/* ---------------- Bidding Card ---------------- */
-const BiddingCard = ({ item, bidValue, onIncrease, onDecrease, onPlaceBid }: any) => {
-  const [expanded, setExpanded] = useState(false);
-  const isMin = bidValue <= item.bidAmount;
+      if (SelectedAuction.auctionPattern === 'Forward') {
+        const res = await apiCall<any>('get', FORWARD_AUCTION_ITEM, {}, payload);
+        if (res?.statusCode === 200) auctionItem = res.data || [];
+      } else {
+        const res = await apiCall<any>('get', REVERSE_AUCTION_ITEM, {}, payload);
+        if (res?.statusCode === 200) auctionItem = res.data || [];
+      }
 
-  const animation = useSharedValue(0);
+      const selectedRes = await apiCall<any>('get', SELECTED_AUCTION_ITEM, {}, payload);
+console.log(selectedRes,'jhhhhhhhhhh');
 
-  const toggleExpand = () => {
-    setExpanded(!expanded);
-    animation.value = withSpring(expanded ? 0 : 1, { damping: 15 });
+      const uniqueArray: number[] = Array.from(
+        new Set(selectedRes?.data || [])
+      );
+
+      const filteredItems = auctionItem.filter(item =>
+        uniqueArray.includes(item.id)
+      );
+
+
+      const result = await createRoom(SelectedAuction.auctionNumber);
+
+      subscribe(`/topic/room/${SelectedAuction.auctionNumber}`, data => {
+        console.log('🔥 BID UPDATE:', data);
+      });
+
+      const bidAmountMap2 = new Map<number, { bidAmount: number; contractorId: number }>();
+
+      (result || []).forEach((r: any) => {
+        bidAmountMap2.set(r.auctionItemId, {
+          bidAmount: r.bidAmount,
+          contractorId: r.contractorId,
+        });
+      });
+
+
+
+      const bidAmountMap = new Map<number, number>();
+
+      (result || []).forEach((r: any) => {
+        bidAmountMap.set(r.auctionItemId, r.bidAmount);
+      });
+
+      const updatedFilteredItems = filteredItems.map(item => {
+        const bidData = bidAmountMap2.get(item.id);
+        return {
+          ...item,
+          bidAmount: bidData?.bidAmount ?? item.auctionStartValueFigure,
+          bidAvilable: bidData?.bidAmount ?? 0,
+          me: bidData?.contractorId == loginUser.contractorId ? true : false
+        };
+      });
+
+      const initialBids: Record<number, number> = {};
+      updatedFilteredItems.forEach(item => {
+        initialBids[item.id] = item.bidAmount;
+      });
+      setBidValues(initialBids);
+      setItems(updatedFilteredItems);
+
+    } catch (error) {
+      console.error('Error fetching auction items:', error);
+    }
   };
 
-  const bodyStyle = useAnimatedStyle(() => {
-    return {
-      height: interpolate(animation.value, [0, 1], [0, 190]),
-      opacity: interpolate(animation.value, [0, 0.5, 1], [0, 0, 1]),
-      marginTop: interpolate(animation.value, [0, 1], [0, 15]),
-    };
+  subscribe(`/topic/room/${SelectedAuction.auctionNumber}`, async (message) => {
+    // console.log('RAW MESSAGE:', message[message.length - 1]);
+    const result = message[message.length - 1]
+
+    const updatedBidItem = (prev: any[]) =>
+      prev.map(item =>
+        item.id === result.auctionItemId
+          ? { ...item, bidAmount: result.bidAmount, me: result.contractorId == loginUser.contractorId ? true : false }
+          : item
+      );
+
+    setItems(updatedBidItem);
+
+    setBidValues(prev => ({
+      ...prev,
+      [result.auctionItemId]: result.bidAmount,
+    }));
+    try {
+
+    } catch (err) {
+      console.log('JSON parse error:', err);
+    }
   });
 
-  const arrowStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${interpolate(animation.value, [0, 1], [0, 180])}deg` }],
-  }));
+  useEffect(() => {
+    getAllAcutionItems();
+    subscribe(`/topic/room/${SelectedAuction.auctionNumber}`, (data) => { });
+  }, []);
 
-  return (
-    <Animated.View
-      layout={Layout.springify()}
-      entering={FadeInUp.delay(item.id * 100)}
-      style={[styles.card, item.me && styles.leadingCard]}
-    >
-      {/* Header - Always Visible */}
-      <TouchableOpacity
-        activeOpacity={0.7}
-        onPress={toggleExpand}
-        style={styles.cardHeader}
-      >
-        <View style={{ flex: 1 }}>
-          <Text style={styles.productName}>{item.productName}</Text>
-          <Text style={styles.itemIdText}>{DUMMY_AUCTION.auctionNumber}</Text>
-        </View>
-
-        <View style={styles.headerRight}>
-          <View style={[styles.badge, item.me ? styles.meBadge : styles.liveBadge]}>
-            <Text style={[styles.badgeText, item.me ? styles.meText : styles.liveText]}>
-              {item.me ? 'LEADING' : 'LIVE'}
-            </Text>
-          </View>
-          <Animated.Text style={[styles.arrow, arrowStyle]}>▼</Animated.Text>
-        </View>
-      </TouchableOpacity>
-
-      {/* Main Price Info - Always Visible */}
-      <View style={styles.priceRow}>
-        <View>
-          <Text style={styles.label}>Current Bid</Text>
-          <Text style={styles.mainPrice}>₹{item.bidAmount.toLocaleString()}</Text>
-        </View>
-        <View style={{ alignItems: 'flex-end' }}>
-          <Text style={styles.label}>Increment</Text>
-          <Text style={styles.incrementText}>+₹{item.bidVariationValue}</Text>
-        </View>
-      </View>
-
-      {/* Collapsible Section */}
-      <Animated.View style={[styles.collapsibleContainer, bodyStyle]}>
-        <View style={styles.divider} />
-
-        <Text style={styles.bidLabel}>Set Your Bid</Text>
-        <View style={styles.stepperContainer}>
-          <TouchableOpacity
-            onPress={onDecrease}
-            disabled={isMin}
-            style={[styles.stepBtn, isMin && styles.disabledBtn]}
-          >
-            <Text style={styles.stepText}>−</Text>
-          </TouchableOpacity>
-
-          <View style={styles.inputBox}>
-            <Text style={styles.currency}>₹</Text>
-            <Text style={styles.bidValueText}>{bidValue.toLocaleString()}</Text>
-          </View>
-
-          <TouchableOpacity onPress={onIncrease} style={styles.stepBtn}>
-            <Text style={styles.stepText}>+</Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity
-          style={styles.submitBtn}
-          onPress={onPlaceBid}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.submitBtnText}>Confirm Bid</Text>
-        </TouchableOpacity>
-      </Animated.View>
-    </Animated.View>
-  );
-};
-
-/* ---------------- Main Screen ---------------- */
-const StartBidding = () => {
-  const [items, setItems] = useState<AuctionItem[]>(DUMMY_ITEMS);
-  const [bidValues, setBidValues] = useState<Record<number, number>>({});
-  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     const initial: Record<number, number> = {};
-    items.forEach(item => {
+    items.forEach((item: any) => {
       initial[item.id] = item.bidAmount + item.bidVariationValue;
     });
     setBidValues(initial);
@@ -158,38 +140,133 @@ const StartBidding = () => {
     setBidValues(prev => ({ ...prev, [id]: prev[id] + val }));
   };
 
-  const handlePlaceBid = (item: AuctionItem) => {
-    Alert.alert('Confirm', `Place bid for ₹${bidValues[item.id]}?`, [
-      { text: 'No' },
-      {
-        text: 'Yes, Bid',
-        onPress: () => {
-          setItems(prev => prev.map(i => i.id === item.id ? { ...i, bidAmount: bidValues[item.id], me: true } : i));
-          setShowSuccess(true);
-          setTimeout(() => setShowSuccess(false), 2000);
-        }
-      }
-    ]);
+  const submitBid = async (item: any) => {
+    const payload = {
+      itemId: item.id,
+      bidAmount: bidValues[item.id],
+      auctionId: SelectedAuction.auctionId,
+      contractorId: loginUser.contractorId,
+      fullName: loginUser.fullName,
+      roomId: SelectedAuction.auctionNumber,
+    };
+    setAllBoolean((prev: any) => ({ ...prev, bidPayload: payload, }));
+    Alert.alert(
+      'Confirm Bid',
+      `Are you sure you want to place a bid of ₹${payload.bidAmount}?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Submit',
+          onPress: () => {
+
+            placeBidSubmit(payload);
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
+  const placeBidSubmit = async (data: any) => {
+    try {
+      const result: any = await placeBid(data);
+
+      if (result?.status && result.data) {
+        const updatedBidItem = (prev: any[]) =>
+          prev.map(item =>
+            item.id === result.data.auctionItemId
+              ? { ...item, bidAmount: result.data.bidAmount, me: result.data?.contractorId == loginUser.contractorId ? true : false }
+              : item
+          );
+
+        // setItems(updatedBidItem);
+
+
+        // setBidValues((prev: any) => ({
+        //   ...prev,
+        //   [result.data.auctionItemId]: {
+        //     ...prev[result.data.auctionItemId],
+        //     bidAmount: result.data.bidAmount,
+        //   },
+        // }));
+        getAllAcutionItems()
+      }
+    } catch (error) {
+      console.error('Error placing bid:', error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert(
+          'Confirm',
+          'Do you want to go back to Dashboard?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Yes',
+              onPress: () => {
+                Navigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: NavigationString.Home }],
+                  })
+                );
+              },
+            },
+          ],
+          { cancelable: true }
+        );
+
+        return true; // block default back action
+      };
+
+      const subscription = BackHandler.addEventListener(
+        'hardwareBackPress',
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [Navigation])
+  );
   return (
     <View style={styles.container}>
       <InsideHeader title="Bidding Panel" showArrow />
+      <View style={styles.container2}>
+        <Text style={styles.title}>
+          {SelectedAuction.deptName}
+        </Text>
+
+        <View style={styles.timerWrapper}>
+          <CountdownTimer
+            endDate={SelectedAuction.keyDates.auctionBidding.endDateTime}
+            myStyle={{ fontSize: 30 }}
+            size={30}
+          />
+        </View>
+      </View>
+
       <FlatList
         data={items}
         keyExtractor={item => item.id.toString()}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <BiddingCard
-            item={item}
+            item={{ ...item, index }}
             bidValue={bidValues[item.id] || 0}
             onIncrease={() => handleUpdate(item.id, item.bidVariationValue)}
             onDecrease={() => handleUpdate(item.id, -item.bidVariationValue)}
-            onPlaceBid={() => handlePlaceBid(item)}
+            onPlaceBid={() => { submitBid(item) }}
+            SelectedAuction={SelectedAuction}
           />
         )}
         contentContainerStyle={{ padding: 16 }}
       />
-      {showSuccess && (
+
+      {allBoolean.showSuccess && (
         <View style={styles.overlay}>
           <LottieView
             source={require('../../lottie/Success.json')}
@@ -205,9 +282,23 @@ const StartBidding = () => {
 
 export default StartBidding;
 
-/* ---------------- Modern Styles ---------------- */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.white },
+  container2: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  title: {
+    fontSize: 18,
+    fontFamily: FontsFamily.poppinsSemiBold,
+    color: colors.black,
+    marginBottom: 6,
+    // textAlign:'center'
+  },
+  timerWrapper: {
+    alignItems: 'center',
+  },
   card: {
     backgroundColor: '#FFF',
     borderRadius: 24,
