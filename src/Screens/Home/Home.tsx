@@ -142,17 +142,6 @@ const Home = () => {
     },
   ];
 
-  /* ---------------- WebSocket ---------------- */
-  const { connect } = useWebSocketService(
-    Variables.webSocketUrl,
-    () => console.log('WebSocket Connected'),
-    error => console.log('WebSocket Error:', error),
-  );
-
-  useFocusEffect(() => {
-    connect();
-  });
-
   return (
     <View style={styles.screen}>
       <Header title="Dashboard" />

@@ -11,9 +11,12 @@ import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { useAuctionItem, useEmdCheck } from '../../Services/BBPS/Hooks';
 import { apiCall } from '../../Axios/Axios';
-import { AUCTION_ITEM_SUBMIT, CHECK_TECHNICAL_DOCUMENTAION, GET_TECHNICAL_DOCUMENTAION } from '../../Services/BBPS/ApiUrls';
+import { AUCITON_SINGLE_EMD, AUCTION_ITEM_SUBMIT, CHECK_TECHNICAL_DOCUMENTAION, GET_AUCTION_DETAILS, GET_TECHNICAL_DOCUMENTAION } from '../../Services/BBPS/ApiUrls';
 import TemplateFormModal from './Component/TemplateFormModal';
 import { SelectedItem } from './Type/BidType';
+import FontsFamily from '../../Constant/FontsFamily';
+import { all } from 'axios';
+import { showSuccessAlert } from '../../Constant/ShowDailog';
 
 
 const Emd = () => {
@@ -21,7 +24,7 @@ const Emd = () => {
     const SelectedAuction = useSelector((state: any) => state.auction.auction)
     const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
     const [acceptedPolicy, setAcceptedPolicy] = useState(false);
-    const [allBoolean, setAllBoolean] = useState({ isSubmitEmdLoading: false, isEmdComplete: false, auctionItems: [], technicalDocumentStatus: false, selectTemplate: {}, technicalDocModalVisible: false })
+    const [allBoolean, setAllBoolean]: any = useState({ isSubmitEmdLoading: false, isEmdComplete: false, auctionItems: [], technicalDocumentStatus: false, selectTemplate: {}, technicalDocModalVisible: false, emdType: false, fileName: '', file: {} })
     const { mutate } = useEmdCheck()
     const { mutate: AuctionItemMutate, isPending } = useAuctionItem()
 
@@ -62,8 +65,15 @@ const Emd = () => {
         }
     };
 
-
-
+    const pickFileSingle = async () => {
+        try {
+            const res = await pick({ type: ['application/pdf'] });
+            const file = res[0];
+            setAllBoolean((prev: any) => ({ ...prev, file: { name: file.name ?? 'document.pdf', uri: file.uri, type: 'application/pdf' } }))
+        } catch {
+            console.log('Pick cancelled');
+        }
+    };
     /* ---------------- Render Item ---------------- */
     const renderItem = ({ item }: any) => {
         const selected = isSelected(item.id);
@@ -201,15 +211,33 @@ const Emd = () => {
             setAllBoolean((prev: any) => ({ ...prev, isLoading: false }))
         }
     }
+    const getAuction = async () => {
+        const selectedRes = await apiCall<any>('get', GET_AUCTION_DETAILS, {}, { id: SelectedAuction.auctionId });
+        const emdType = String(selectedRes.data.emd)
+            .trim()
+            .replace(/\s+/g, ' ')
+            .toLowerCase();
+
+
+        if (selectedRes.statusCode == 200 && emdType === 'auction wise') {
+            return true
+        } else {
+            return false
+        }
+    }
 
     const AlreadyEmdCheck = async () => {
         try {
             mutate({ auctionNumber: SelectedAuction.auctionNumber }, {
-                onSuccess: (res => {
-                    console.log(SelectedAuction.auctionNumber, res , SelectedAuction,'iiiiiiiiiiiiiiiiiiiiiiiii');
-                    
+                onSuccess: (async (res) => {
                     if (res.statusCode == 200) {
+
                         if (res.message == 'No EMD Documents') {
+                            const result = await getAuction()
+                            if (result) {
+                                setAllBoolean((prev: any) => ({ ...prev, emdType: true }))
+                                return
+                            }
                             setAllBoolean((prev: any) => ({ ...prev, isEmdComplete: false }))
                             getAuctionItem()
                         } else {
@@ -307,7 +335,53 @@ const Emd = () => {
             getTemplateDocumentation()
         }
     }
+
+
+    const singleEmdSubmit = async () => {
+        try {
+            setAllBoolean((prev: any) => ({ ...prev, isSubmitEmdLoading: true }))
+
+            if (!acceptedPolicy) {
+                Alert.alert('Policy Required', 'Please accept terms');
+                return;
+            }
+            const formData = new FormData();
+
+            formData.append('auctionId', SelectedAuction.auctionId);
+            formData.append('productImageName', allBoolean.fileName);
+            formData.append('files', allBoolean.file);
+
+            const response = await apiCall<any>(
+                'post',
+                AUCITON_SINGLE_EMD,
+                formData,
+                {},
+                'multipart/form-data'
+            );
+
+            if (response?.statusCode === 200) {
+                showSuccessAlert(response.message || 'EMD submitted successfully');
+                if (SelectedAuction.auctionPattern === 'Forward') {
+                    Navigation.navigate(NavigationString.StartBidding)
+                } else {
+                    Navigation.navigate(NavigationString.StartReverseBidding)
+                }
+            }
+        } catch (error: any) {
+            if (error?.response) {
+                console.log('Server error:', error.response.data);
+            } else if (error?.request) {
+                console.log('Network error:', error.request);
+            } else {
+                console.log('Error message:', error.message);
+            }
+        } finally {
+            setAllBoolean((prev: any) => ({ ...prev, isSubmitEmdLoading: false }))
+        }
+    };
+
     useEffect(() => {
+        // getAuction()
         AlreadyEmdCheck()
     }, [])
 
@@ -323,7 +397,49 @@ const Emd = () => {
                     <Skelton />
                 ) : allBoolean.isEmdComplete ? (
                     <EmdComplete onNext={EmdContinueHandle} />
-                ) : <>
+                ) : allBoolean.emdType ? <View style={{ flex: 1 }}>
+                    <View style={styles.container2}>
+                        <Text style={{ color: colors.black, fontSize: 17, fontFamily: FontsFamily.poppinsSemiBold }}>Document Name</Text>
+                        <TextInput
+                            style={styles.input2}
+                            placeholder="Enter document name...."
+                            value={allBoolean.fileName}
+                            editable={true}
+                            placeholderTextColor={colors.grayText}
+                            onChangeText={(text) => { setAllBoolean((prev: any) => ({ ...prev, fileName: text })) }}
+                        />
+
+                        <TouchableOpacity style={styles.button} onPress={() => { pickFileSingle() }}>
+                            <Text style={styles.buttonText}>{allBoolean?.file?.name ? allBoolean?.file?.name : 'Choose File'}</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.bottom}>
+                        <BouncyCheckbox
+                            size={18}
+                            fillColor={colors.primary}
+                            iconStyle={{ borderRadius: 5, borderWidth: 1.5, borderColor: colors.primary }}
+                            innerIconStyle={{ borderRadius: 5 }}
+                            isChecked={acceptedPolicy}
+                            onPress={() => setAcceptedPolicy(p => !p)}
+                            text="I agree to Terms & Privacy Policy"
+                            textStyle={styles.policyText}
+                        />
+
+                        <TouchableOpacity
+                            style={[
+                                styles.submitBtn,
+                                !acceptedPolicy && styles.disabled,
+                            ]}
+                            onPress={singleEmdSubmit}
+                            disabled={!acceptedPolicy}
+                        >
+                            {
+                                allBoolean.isSubmitEmdLoading ? <Loader size='small' color={colors.white} /> : <Text style={styles.submitText}>Submit EMD</Text>
+                            }
+
+                        </TouchableOpacity>
+                    </View>
+                </View> : <>
                     <FlatList
                         data={allBoolean.auctionItems}
                         keyExtractor={(item: any) => item.auctionId}
@@ -369,9 +485,29 @@ export default Emd;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 10
+        // paddingHorizontal: 10,
+        backgroundColor: colors.white
     },
+    container2: {
+        paddingHorizontal: 10,
+        paddingVertical: 10,
+        backgroundColor: colors.white,
+        elevation: 2,
+        borderRadius: 10,
+        marginTop: 20,
+        marginHorizontal: 10
 
+    },
+    button: {
+        backgroundColor: colors.primary,
+        padding: 12,
+        borderRadius: 6,
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: '#fff',
+        fontWeight: '600',
+    },
     card: {
         backgroundColor: '#FFFFFF',
         marginHorizontal: 5,
@@ -432,6 +568,16 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         fontSize: 14,
         color: colors.black
+    },
+    input2: {
+        borderWidth: 1,
+        borderColor: '#CBD5E1',
+        borderRadius: 14,
+        padding: 12,
+        backgroundColor: '#FFFFFF',
+        fontSize: 14,
+        color: colors.black,
+        marginBottom: 20
     },
 
     uploadBtn: {

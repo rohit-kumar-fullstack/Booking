@@ -1,5 +1,5 @@
 // import React, { useCallback, useEffect, useState } from 'react';
-// import { View, FlatList, StyleSheet, Platform, Alert, BackHandler, Text, ToastAndroid } from 'react-native';
+// import { View, FlatList, StyleSheet, Platform, Alert, BackHandler, Text } from 'react-native';
 // import LottieView from 'lottie-react-native';
 // import { InsideHeader } from '../../Component/Index';
 // import colors from '../../Constant/Color';
@@ -36,12 +36,13 @@
 //       if (SelectedAuction.auctionPattern === 'Forward') {
 //         const res = await apiCall<any>('get', FORWARD_AUCTION_ITEM, {}, payload);
 //         if (res?.statusCode === 200) auctionItem = res.data || [];
-//       } else if(SelectedAuction.auctionPattern === 'Reverse') {
+//       } else {
 //         const res = await apiCall<any>('get', REVERSE_AUCTION_ITEM, {}, payload);
 //         if (res?.statusCode === 200) auctionItem = res.data || [];
 //       }
 
 //       const selectedRes = await apiCall<any>('get', SELECTED_AUCTION_ITEM, {}, payload);
+//       console.log(selectedRes, 'jhhhhhhhhhh');
 
 //       const uniqueArray: number[] = Array.from(
 //         new Set(selectedRes?.data || [])
@@ -98,7 +99,7 @@
 //   };
 
 //   subscribe(`/topic/room/${SelectedAuction.auctionNumber}`, async (message) => {
-
+//     // console.log('RAW MESSAGE:', message[message.length - 1]);
 //     const result = message[message.length - 1]
 
 //     const updatedBidItem = (prev: any[]) =>
@@ -160,6 +161,7 @@
 //         {
 //           text: 'Submit',
 //           onPress: () => {
+
 //             placeBidSubmit(payload);
 //           },
 //         },
@@ -180,7 +182,6 @@
 //               : item
 //           );
 
-//         // ToastAndroid.show(result.message, ToastAndroid.SHORT)
 //         // setItems(updatedBidItem);
 
 

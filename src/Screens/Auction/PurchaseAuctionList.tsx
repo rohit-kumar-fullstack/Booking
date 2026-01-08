@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { InsideHeader, Loader } from '../../Component/Index';
 import colors from '../../Constant/Color';
 import { CreditCard, Calendar, User, DollarSign, ArrowRight } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { useOfflineAuctionPurchase } from '../../Services/BBPS/Hooks';
+import { useOfflineAuctionPurchase, usePurchaseAuctionList } from '../../Services/BBPS/Hooks';
 import { showSuccessAlert } from '../../Constant/ShowDailog';
 import { clearPurchaseAuction } from '../../Redux/Slices/selectPurchaseAuction';
-import { CommonActions, useNavigation } from '@react-navigation/native';
+import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native';
 import NavigationString from '../../Constant/NavigationString';
+import Skeleton from '../../Component/Skelton/Skelton';
 
 const dummyAuctionList = [
     {
@@ -23,39 +24,18 @@ const dummyAuctionList = [
         portalCharge: 100,
         payableAmount: 3050,
     },
-    {
-        auctionId: 2,
-        auctionNumber: 'AUC-2025-002',
-        auctionPattern: 'Two Stage',
-        auctionDispatchDate: '28 Feb 2025',
-        auctionDispatcherNumber: 'DISP-002',
-        auctionFees: 1800,
-        gst: 18,
-        gstAmount: 324,
-        portalCharge: 80,
-        payableAmount: 2204,
-    },
-    {
-        auctionId: 3,
-        auctionNumber: 'AUC-2025-003',
-        auctionPattern: 'Single Stage',
-        auctionDispatchDate: '01 Mar 2025',
-        auctionDispatcherNumber: 'DISP-003',
-        auctionFees: 3200,
-        gst: 18,
-        gstAmount: 576,
-        portalCharge: 120,
-        payableAmount: 3896,
-    },
 ];
 
 const PurchaseAuctionList = () => {
     const Navigation = useNavigation()
     const Dispatch = useDispatch()
     const [loading, setLoading] = useState(false);
-    const [list, setList] = useState(dummyAuctionList);
+    const [list, setList] = useState([]);
     const SelectedPurchaseList = useSelector((state: any) => state.selectPurchaseAuction);
+    const LoginUser = useSelector((state: any) => state.token.token);
     const { mutate, isPending } = useOfflineAuctionPurchase()
+    const { mutate: purchaseListMutation, isPending: purchaseListPending } = usePurchaseAuctionList();
+
     const calculateTotalAmount = (item: any) => {
         const gstAmount =
             (Number(item.auctionFees) + Number(item.portalCharge)) *
@@ -68,7 +48,7 @@ const PurchaseAuctionList = () => {
 
     const handleOfflinePurchase = async () => {
         const body = {
-            auctionDetails: SelectedPurchaseList.map((b: any) => ({
+            auctionDetails: list.map((b: any) => ({
                 auctionDispatchDate: b?.auctionDispatchDate,
                 auctionDispatcherNumber: b?.auctionDispatcherNumber,
                 auctionFees: b?.auctionFees,
@@ -155,16 +135,37 @@ const PurchaseAuctionList = () => {
         </View>
     );
 
+    const getPurchaseList = () => {
+        const auctionNumbers: string[] = SelectedPurchaseList.map(
+            (item: { auctionNumber: string }) => item.auctionNumber
+        );
+        purchaseListMutation({ auctionNumbers, contractorId: LoginUser.contractorId }, {
+            onSuccess: (res) => {
+                if (res.statusCode == 200) {
+                    setList(res.data)
+                }
+            },
+            onError: (error) => {
+                console.log(error, "=================purchase list error");
+            }
+        })
+    }
+    useFocusEffect(
+        React.useCallback(() => {
+            getPurchaseList()
+        }, [SelectedPurchaseList])
+    );
+
     return (
         <View style={{ flex: 1, backgroundColor: colors.white }}>
             <InsideHeader title="Purchase List" showArrow />
             <View style={styles.screen}>
-                <FlatList
-                    data={SelectedPurchaseList}
+                {purchaseListPending ? <Skeleton /> : <FlatList
+                    data={list}
                     renderItem={renderItem}
                     keyExtractor={(item) => item.auctionId.toString()}
                     contentContainerStyle={styles.container}
-                />
+                />}
             </View>
 
             <View style={styles.bottomButtonContainer}>

@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
-import { fetchAuctionItem, fetchDashboard, fetchEmdCheck, fetchLiveAuction, fetchLiveTender, fetchPurchaseAuction, fetchPurchaseTender, offlineAuctionPurchase, userLogin } from './apis';
+import { fetchAuctionItem, fetchDashboard, fetchEmdCheck, fetchLiveAuction, fetchLiveTender, fetchPurchaseAuction, fetchPurchaseAuctionList, fetchPurchaseTender, getAuction, offlineAuctionPurchase, userLogin, viewAuctionDocumentDownload, viewAuctionDocuments, viewAuctionItemDocuments } from './apis';
 
 // User
 
@@ -32,6 +32,7 @@ export const useFetchLiveTender = () => {
         queryFn: () => fetchLiveTender()
     });
 };
+
 export const useFetchPurchaseAuction = () => {
     return useQuery({
         queryKey: ['fetchPurchaseAuction',],
@@ -39,25 +40,28 @@ export const useFetchPurchaseAuction = () => {
     });
 };
 
-
 export const useFetchLiveAuction = () => {
     return useInfiniteQuery<any>({
-        queryKey: ['fetchLiveAuction',],
-        queryFn: ({ pageParam = 1 }) =>
+        queryKey: ['fetchLiveAuction'],
+        queryFn: ({ pageParam = 0 }) =>
             fetchLiveAuction({
                 page: pageParam,
                 size: 10,
             }),
-        initialPageParam: 1,
-        getNextPageParam: (lastPage) => {
-            const { page, size, totalCount } = lastPage;
+        initialPageParam: 0,
+
+        getNextPageParam: (lastPage, allPages) => {
+            const { size, totalCount } = lastPage;
             const totalPages = Math.ceil(totalCount / size);
-            const nextPage = page + 1;
+            const nextPage = allPages.length;
             return nextPage < totalPages ? nextPage : undefined;
         },
-        select: (data) => {
 
-            const mergedResults = data.pages.flatMap((page: any) => page.data ?? []);
+        select: (data) => {
+            const mergedResults = data.pages.flatMap(
+                (page: any) => page?.data ?? []
+            );
+
             return {
                 ...data,
                 result: mergedResults,
@@ -65,7 +69,6 @@ export const useFetchLiveAuction = () => {
         },
     });
 };
-
 
 
 // Auction Purchase offline
@@ -85,6 +88,41 @@ export const useEmdCheck = () => {
 
 export const useAuctionItem = () => {
     return useMutation({
-        mutationFn: (payload: any) => fetchAuctionItem(payload),
+        mutationFn: (payload: { auctionNumber: string, status: string }) => fetchAuctionItem(payload),
+    });
+};
+
+
+// Purchase Auction List
+export const usePurchaseAuctionList = () => {
+    return useMutation({
+        mutationFn: (payload: any) => fetchPurchaseAuctionList(payload),
+    });
+};
+
+export const useGetAuciton = (payload: { auctionId: string }) => {
+    return useQuery({
+        queryKey: ['getAuction'],
+        queryFn: () => getAuction(payload)
+    });
+};
+
+export const useGetAucitonDocument = (payload: { auctionId: number }) => {
+    return useQuery({
+        queryKey: ['viewAuctionDocuments'],
+        queryFn: () => viewAuctionDocuments(payload)
+    });
+};
+
+export const useAucitonItemDetail = (payload: { auctionItemId: number }) => {
+    return useQuery({
+        queryKey: ['viewAuctionItemDocuments'],
+        queryFn: () => viewAuctionItemDocuments(payload)
+    });
+};
+
+export const useAucitonDocDownload = () => {
+    return useMutation({
+        mutationFn: (payload: { documentId: number, isAmendment: boolean }) => viewAuctionDocumentDownload(payload),
     });
 };

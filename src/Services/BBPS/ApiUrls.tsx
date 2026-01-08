@@ -61,13 +61,25 @@ const ITEM_DOCUMENT_DOWNLOAD = `${BASE_URL_Auction}api/auction/home/downloadDocu
 
 // Rohit
 const DASHBOARD_COUNT = `${BASE_URL_Auction}api/auction/home/dashboard/counts`
-const AUCTION_ONE_TIME_BID =`${BASE_URL_Auction}api/bidding/getBidForAuction`
+const AUCTION_ONE_TIME_BID = `${BASE_URL_Auction}api/bidding/getBidForAuction`
+const AUCITON_SINGLE_EMD = `${BASE_URL_Auction}api/auction/addEMDDocumentsAuctionWise`
+const PURCHASE_AUCTION_LIST = `${BASE_URL_Auction}api/auction/proceedToPurchase`
+const VIEW_AUCTION_ITEM_DETAIL = `${BASE_URL_Auction}api/auction/home/viewDocumentsForAuctionItemDetails`
+const VIEW_AUCTION_DOCUMENTS = `${BASE_URL_Auction}api/auction/viewDocumentsForAuction`
+const AUCTION_DOCUMENT_DOWNLOAD = `${BASE_URL_Auction}api/auction/home/downloadDocumentForAuction`
+const AUCTION_ITEM_DOCUMENT_DOWNLOAD = `${BASE_URL_Auction}api/auction/home/downloadDocument/auctionItemId`
 
 export {
   // Rohit
+  VIEW_AUCTION_ITEM_DETAIL,
+  AUCTION_ITEM_DOCUMENT_DOWNLOAD,
+  AUCTION_DOCUMENT_DOWNLOAD,
+  VIEW_AUCTION_DOCUMENTS,
+  AUCITON_SINGLE_EMD,
   DASHBOARD_COUNT,
   AUCTION_ONE_TIME_BID,
   ITEM_DOCUMENT_DOWNLOAD,
+  PURCHASE_AUCTION_LIST,
   ITEM_DETAIL,
   TECHNICAL_DOCUMENT_SUBMIT,
   TECHNICAL_VALUE_SUBMIT,

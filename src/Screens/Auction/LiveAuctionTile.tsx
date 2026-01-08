@@ -21,8 +21,6 @@ const LiveAuctionTile: React.FC<LiveAuctionTileProps> = ({
 
   return (
     <View style={styles.cardWrapper}>
-      {/* Status Tag */}
-
       {
         !showDetail ?
           <>

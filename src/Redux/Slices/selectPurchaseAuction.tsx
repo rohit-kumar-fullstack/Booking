@@ -5,7 +5,6 @@ export interface AuctionItem {
     [key: string]: any;
 }
 
-// ✅ DEFAULT = EMPTY ARRAY
 const initialState: AuctionItem[] = [];
 
 export const selectPurchaseAuctionSlice = createSlice({

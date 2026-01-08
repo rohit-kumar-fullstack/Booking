@@ -26,7 +26,7 @@ const PurchaseList = () => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.heading}>Purchase List</Text>
-          <Info size={20} color="#0F172A" />
+          {/* <Info size={20} color="#0F172A" /> */}
         </View>
 
         {/* Cards */}

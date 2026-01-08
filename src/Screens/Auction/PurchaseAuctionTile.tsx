@@ -31,7 +31,6 @@ const PurchaseAuctionTile = ({ item, onPressDetails, onStartBidding, buttonEnabl
   const statusColor = isAuctionEnd ? '#EF4444' : buttonEnable ? colors.primary : '#94A3B8';
 
   const lightStatusBg = isAuctionEnd ? '#FEF2F2' : buttonEnable ? '#EFF6FF' : '#F8FAFC';
-  console.log(item?.keyDates?.auctionBidding?.endDateTime, 'kk');
 
   return (
     <View style={{ flex: 1 }}>

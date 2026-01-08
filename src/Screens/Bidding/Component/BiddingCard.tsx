@@ -1,12 +1,20 @@
-import React, { memo, useCallback, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import React, { memo, useCallback, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, TextInput, Alert } from 'react-native';
 import Animated, { FadeInUp, Layout, interpolate, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import colors from '../../../Constant/Color';
 import AuctionItemDetail from '../../Auction/Modal/AuctionItemDetail';
 import MainStyle from '../../../Styles/MainStyle';
+import { Loader } from '../../../Component/Index';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
+import Variables from '../../../Constant/Variable';
+import { showErrorAlert, showSuccessAlert } from '../../../Constant/ShowDailog';
 
-const BiddingCard = ({ item, bidValue, onIncrease, onDecrease, onPlaceBid, SelectedAuction }: any) => {
-    const [showDetail, setShowDetail] = React.useState(false);
+const BiddingCard = ({ item, bidValue, onIncrease, onDecrease, onPlaceBid, SelectedAuction, allBoolean, setAllBoolean }: any) => {
+    const Token = useSelector((state: any) => state.token.token)
+    const [showDetail, setShowDetail] = useState(false);
+    const [value, setValue] = useState(`${item.bidAmount}`);
+    const [allState, setAllState] = useState({ isLoading: false })
     const isMin = bidValue <= item.bidAmount;
 
     // 🔒 Persist expand state safely
@@ -26,6 +34,11 @@ const BiddingCard = ({ item, bidValue, onIncrease, onDecrease, onPlaceBid, Selec
         opacity: interpolate(animation.value, [0, 0.5, 1], [0, 0, 1]),
         marginTop: interpolate(animation.value, [0, 1], [0, 15]),
     }));
+    const bodyStyle2 = useAnimatedStyle(() => ({
+        height: interpolate(animation.value, [0, 1], [0, 100]),
+        opacity: interpolate(animation.value, [0, 0.5, 1], [0, 0, 1]),
+        marginTop: interpolate(animation.value, [0, 1], [0, 15]),
+    }));
 
     const arrowStyle = useAnimatedStyle(() => ({
         transform: [
@@ -34,6 +47,53 @@ const BiddingCard = ({ item, bidValue, onIncrease, onDecrease, onPlaceBid, Selec
             },
         ],
     }));
+    const MAX_VALUE = Number(item.bidAmount);
+
+    const handleChange = (text: string) => {
+        let cleaned = text.replace(/[^0-9.]/g, '');
+        if ((cleaned.match(/\./g) || []).length > 1) return;
+        setValue(cleaned);
+    };
+
+
+    const oneTimePlaceBid = async () => {
+        try {
+            if (Number(value) < MAX_VALUE) {
+                showErrorAlert("Enter the greather vlaue to current bid value")
+                return false
+            }
+            setAllState((prev: any) => ({ ...prev, isLoading: true }))
+            const payload = {
+                itemId: item.id,
+                bidAmount: Number(value),
+                auctionId: SelectedAuction.auctionId,
+                contractorId: Token.contractorId,
+                fullName: Token.fullName,
+            };
+
+
+            const res = await axios.post(
+                `${Variables.socketUrl}bidding/placeBidForAuction`,
+                [payload],
+                { headers: { Authentication: `Bearer ${Token.token}` } }
+            );
+
+            if (res.data.statusCode === 200) {
+                showSuccessAlert(res.data.message);
+            }
+            setAllBoolean((prev: any) => ({ ...prev, reload: !prev.reload }))
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                showErrorAlert(error.response?.data.message)
+            } else {
+                console.log('UNKNOWN ERROR:', error);
+            }
+
+        } finally {
+            setAllState((prev: any) => ({ ...prev, isLoading: false }))
+        }
+    }
+    // console.log(item, 'jkjjj');
 
     return (
         <View>
@@ -80,7 +140,7 @@ const BiddingCard = ({ item, bidValue, onIncrease, onDecrease, onPlaceBid, Selec
                     <View style={styles.priceRow}>
                         <View>
                             <Text style={styles.label}>Current Bid</Text>
-                            <Text style={styles.mainPrice}>₹{item?.bidAmount}</Text>
+                            <Text style={styles.mainPrice}>₹{item?.bidAmount || item.auctionStartValueFigure}</Text>
                         </View>
 
                         <View style={{ alignItems: 'flex-end' }}>
@@ -92,12 +152,12 @@ const BiddingCard = ({ item, bidValue, onIncrease, onDecrease, onPlaceBid, Selec
                     </View>
 
                     {/* COLLAPSIBLE BODY */}
-                    <Animated.View style={[styles.collapsibleContainer, bodyStyle]}>
+                    <Animated.View style={[styles.collapsibleContainer, (!allBoolean.rebid && item.contractorId == undefined) ? bodyStyle : bodyStyle2]}>
                         <View style={styles.divider} />
 
                         <Text style={styles.bidLabel}>Set Your Bid</Text>
 
-                        <View style={styles.stepperContainer}>
+                        {!allBoolean.oneTimeBid && <View style={styles.stepperContainer}>
                             <TouchableOpacity
                                 onPress={onDecrease}
                                 disabled={isMin}
@@ -114,16 +174,30 @@ const BiddingCard = ({ item, bidValue, onIncrease, onDecrease, onPlaceBid, Selec
                             <TouchableOpacity onPress={onIncrease} style={styles.stepBtn}>
                                 <Text style={styles.stepText}>+</Text>
                             </TouchableOpacity>
-                        </View>
+                        </View>}
+                        {
+                            (allBoolean.oneTimeBid || allBoolean.rebid) && <View style={styles.inputBox2}>
+                                <Text style={styles.currency2}>₹</Text>
 
-                        <TouchableOpacity
-                            style={styles.submitBtn}
-                            onPress={onPlaceBid}
-                        // activeOpacity={0.85}
+                                <TextInput
+                                    value={value}
+                                    onChangeText={handleChange}
+                                    keyboardType="decimal-pad"
+                                    placeholder="0.00"
+                                    style={styles.input}
+                                    placeholderTextColor="#94A3B8"
+                                />
+                            </View>
+                        }
 
+                        {(!allBoolean.rebid && item.contractorId == undefined) ? <TouchableOpacity
+                            style={[styles.submitBtn]}
+                            onPress={(allBoolean.oneTimeBid || allBoolean.rebid) ? oneTimePlaceBid : onPlaceBid}
                         >
-                            <Text style={styles.submitBtnText}>Confirm Bid</Text>
-                        </TouchableOpacity>
+                            {
+                                allState.isLoading ? <Loader size='small' color={colors.white} /> : <Text style={styles.submitBtnText}>Confirm Bid</Text>
+                            }
+                        </TouchableOpacity> : null}
                     </Animated.View>
                 </Animated.View>
                     :
@@ -135,7 +209,31 @@ const BiddingCard = ({ item, bidValue, onIncrease, onDecrease, onPlaceBid, Selec
 };
 
 export default memo(BiddingCard);
+
 const styles = StyleSheet.create({
+    inputBox2: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F1F5F9',
+        borderRadius: 12,
+        height: 45,
+        paddingHorizontal: 12,
+        width: '100%',
+        marginBottom: 20
+    },
+    currency2: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#64748B',
+        marginRight: 4,
+    },
+    input: {
+        flex: 1,
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#0F172A',
+        width: '100%'
+    },
     card: {
         backgroundColor: '#FFF',
         borderRadius: 24,

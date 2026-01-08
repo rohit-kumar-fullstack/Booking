@@ -1,5 +1,5 @@
 import axios from "axios";
-import { DASHBOARD_COUNT, EMD_CHECK, FORARD_AUCTION_ITEM, GET_MY_AUCTION, GET_MY_TENDER, LIVE_AUCTION, LIVE_TENDER, LOG_IN_URL, PROCEED_PURCHASE_AUCTION, PURCHASE_OFFLINE_AUCTION, REVERSE_AUCTION_ITEM } from "./ApiUrls";
+import { AUCTION_DOCUMENT_DOWNLOAD, DASHBOARD_COUNT, EMD_CHECK, FORARD_AUCTION_ITEM, GET_AUCTION_DETAILS, GET_MY_AUCTION, GET_MY_TENDER, LIVE_AUCTION, LIVE_TENDER, LOG_IN_URL, PROCEED_PURCHASE_AUCTION, PURCHASE_AUCTION_LIST, PURCHASE_OFFLINE_AUCTION, REVERSE_AUCTION_ITEM, VIEW_AUCTION_DOCUMENTS, VIEW_AUCTION_ITEM_DETAIL } from "./ApiUrls";
 import { apiCall } from "../../Axios/Axios";
 
 // User
@@ -32,7 +32,7 @@ export const fetchPurchaseAuction = async (): Promise<any> => {
   return data
 }
 export const fetchLiveAuction = async (payload: any): Promise<any> => {
-  const data = await apiCall<any>('get', `${LIVE_AUCTION}`, {}, { payload });
+  const data = await apiCall<any>('get', `${LIVE_AUCTION}`, {}, payload);
   return data
 }
 
@@ -72,3 +72,26 @@ export const fetchAuctionItem = async (payload: any): Promise<any> => {
     throw error.response?.data || error.message;
   }
 };
+
+
+export const fetchPurchaseAuctionList = async (payload: any): Promise<any> => {
+  const data = await apiCall<any>('post', `${PURCHASE_AUCTION_LIST}`, payload);
+  return data
+}
+
+export const getAuction = async (payload: any) => {
+  const selectedRes = await apiCall<any>('get', GET_AUCTION_DETAILS, {}, { id: payload.auctionId });
+  return selectedRes.data;
+}
+export const viewAuctionItemDocuments = async (payload: { auctionItemId: number }) => {
+  const selectedRes = await apiCall<any>('get', VIEW_AUCTION_ITEM_DETAIL, {}, payload);
+  return selectedRes.data;
+}
+export const viewAuctionDocuments = async (payload: { auctionId: number }) => {
+  const selectedRes = await apiCall<any>('get', VIEW_AUCTION_DOCUMENTS, {}, payload);
+  return selectedRes.data;
+}
+export const viewAuctionDocumentDownload = async (payload: { documentId: number, isAmendment: boolean }) => {
+  const selectedRes = await apiCall<any>('get', AUCTION_DOCUMENT_DOWNLOAD, {}, payload);
+  return selectedRes.data;
+}

@@ -1,52 +1,40 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { View, FlatList, ActivityIndicator, RefreshControl, Text } from 'react-native';
 import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
 import LiveAuctionTile from './LiveAuctionTile';
-import { useNavigation } from '@react-navigation/native';
 import { useFetchLiveAuction } from '../../Services/BBPS/Hooks';
 import { SearchInput } from '../../Component/Serach/SeacrhInput';
 import { Skelton } from '../../Component/Index';
 import colors from '../../Constant/Color';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectPurchaseAuctionSlice, togglePurchaseAuction } from '../../Redux/Slices/selectPurchaseAuction';
+import { togglePurchaseAuction } from '../../Redux/Slices/selectPurchaseAuction';
 import { apiCall } from '../../Axios/Axios';
-import { GET_MY_AUCTION, LIVE_AUCTION } from '../../Services/BBPS/ApiUrls';
-import moment from 'moment';
+import { GET_MY_AUCTION } from '../../Services/BBPS/ApiUrls';
 
 const LiveAuction = () => {
-    const navigation: any = useNavigation();
     const Dispatch = useDispatch()
+    const onEndReachedCalledDuringMomentum = useRef(true);
     const SelectedPurchaseList = useSelector((state: any) => state.selectPurchaseAuction);
-    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isRefetching, refetch }: any = useFetchLiveAuction();
     const [showRefreshBanner, setShowRefreshBanner] = useState(false);
     const [allBoolean, setAllBoolean] = useState({ liveAuctionData: [] })
+    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isRefetching, refetch, isPending }: any = useFetchLiveAuction();
 
-    useEffect(() => {
-        if (isRefetching) {
-            setShowRefreshBanner(true);
-        } else {
-            const timer = setTimeout(() => {
-                setShowRefreshBanner(false);
-            }, 1000);
+    // My Methods
 
-            return () => clearTimeout(timer);
+    const getMyAuction = async () => {
+        try {
+            const res = await apiCall<any>('get', `${GET_MY_AUCTION}`,);
+            if (res?.statusCode === 200) {
+                const purchasedIds = new Set(res.data.map((item: any) => item.auctionId));
+                const filteredLive = data?.result.map((item: any) => ({ ...item, active: !purchasedIds.has(item.auctionId) }));
+                setAllBoolean(prev => ({ ...prev, liveAuctionData: filteredLive }));
+            }
+        } catch (error) {
+            console.error('getMyAuction error', error);
+        } finally {
+            setAllBoolean(prev => ({ ...prev, isLoading: false }));
         }
-    }, [isRefetching]);
-
-    const loadMore = useCallback(() => {
-        if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
-        }
-    }, [hasNextPage, isFetchingNextPage]);
-
-    const renderFooter = useCallback(() => {
-        if (!isFetchingNextPage) return null;
-        return (
-            <View style={{ paddingVertical: 12 }}>
-                <ActivityIndicator size="small" color={colors.primary} />
-            </View>
-        );
-    }, [isFetchingNextPage]);
+    };
 
     const renderItem = useCallback(
         ({ item, index }: any) => {
@@ -68,32 +56,35 @@ const LiveAuction = () => {
         [SelectedPurchaseList]
     );
 
-    const getMyAuction = async () => {
-        try {
+    const loadMore = useCallback(() => {
+        if (onEndReachedCalledDuringMomentum.current) return;
 
-            const res = await apiCall<any>('get', `${GET_MY_AUCTION}`,);
+        if (!hasNextPage || isFetchingNextPage) return;
 
-            if (res?.statusCode === 200) {
-                const purchasedIds = new Set(
-                    res.data.map((item: any) => item.auctionId),
-                );
+        fetchNextPage();
+        onEndReachedCalledDuringMomentum.current = true;
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-                const filteredLive = data?.result.map((item: any) => ({
-                    ...item,
-                    active: !purchasedIds.has(item.auctionId), // false if match, true otherwise
-                }));
+    const renderFooter = useCallback(() => {
+        if (!isFetchingNextPage) return null;
+        return (
+            <View style={{ paddingVertical: 12 }}>
+                <ActivityIndicator size="small" color={colors.primary} />
+            </View>
+        );
+    }, [isFetchingNextPage]);
 
-                setAllBoolean(prev => ({
-                    ...prev,
-                    liveAuctionData: filteredLive
-                }));
-            }
-        } catch (error) {
-            console.error('getMyAuction error', error);
-        } finally {
-            setAllBoolean(prev => ({ ...prev, isLoading: false }));
+    useEffect(() => {
+        if (isRefetching) {
+            setShowRefreshBanner(true);
+        } else {
+            const timer = setTimeout(() => {
+                setShowRefreshBanner(false);
+            }, 1000);
+
+            return () => clearTimeout(timer);
         }
-    };
+    }, [isRefetching]);
 
     useEffect(() => {
         if (data?.result?.length > 0) {
@@ -148,27 +139,34 @@ const LiveAuction = () => {
 
             <FlatList
                 data={allBoolean.liveAuctionData ?? []}
-                keyExtractor={(item: any) => String(item.auctionNumber)}
                 renderItem={renderItem}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 50, paddingTop: 10 }}
+
                 onEndReached={loadMore}
-                onEndReachedThreshold={0.2}
+                onEndReachedThreshold={0.1}
+
+                onMomentumScrollBegin={() => {
+                    onEndReachedCalledDuringMomentum.current = false;
+                }}
+
                 ListFooterComponent={renderFooter}
+
                 refreshControl={
                     <RefreshControl
                         refreshing={isRefetching}
                         onRefresh={refetch}
-                        tintColor="transparent" // Set to transparent if you only want your custom banner to show
+                        tintColor="transparent"
                         colors={[colors.primary]}
                     />
                 }
+
                 initialNumToRender={6}
                 maxToRenderPerBatch={6}
                 windowSize={7}
                 removeClippedSubviews
-                updateCellsBatchingPeriod={50}
             />
+
         </View>
     );
 };

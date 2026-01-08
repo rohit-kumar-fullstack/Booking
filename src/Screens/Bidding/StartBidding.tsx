@@ -7,7 +7,7 @@ import { useWebSocketService } from '../../socket/Socket';
 import Variables from '../../Constant/Variable';
 import { useSelector } from 'react-redux';
 import { apiCall } from '../../Axios/Axios';
-import { FORWARD_AUCTION_ITEM, REVERSE_AUCTION_ITEM, SELECTED_AUCTION_ITEM } from '../../Services/BBPS/ApiUrls';
+import { AUCTION_ONE_TIME_BID, FORWARD_AUCTION_ITEM, GET_AUCTION_DETAILS, REVERSE_AUCTION_ITEM, SELECTED_AUCTION_ITEM } from '../../Services/BBPS/ApiUrls';
 import BiddingCard from './Component/BiddingCard';
 import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native';
 import NavigationString from '../../Constant/NavigationString';
@@ -20,7 +20,7 @@ const StartBidding = () => {
   const Navigation: any = useNavigation()
   const [items, setItems] = useState<any>([]);
   const [bidValues, setBidValues] = useState<Record<number, number>>({});
-  const [allBoolean, setAllBoolean] = useState({ showSuccess: false, showDialog: false, bidPayload: {} })
+  const [allBoolean, setAllBoolean] = useState({ showSuccess: false, showDialog: false, bidPayload: {}, oneTimeBid: false, rebid: false, reload: false })
   const { subscribe, createRoom, placeBid } = useWebSocketService(
     Variables.webSocketUrl,
     () => console.log('Connected!'),
@@ -28,6 +28,25 @@ const StartBidding = () => {
     loginUser.token,
   );
 
+  const getAuction = async () => {
+    const selectedRes = await apiCall<any>('get', GET_AUCTION_DETAILS, {}, { id: SelectedAuction.auctionId });
+    if (selectedRes.statusCode == 200 && selectedRes.data.contractorId.length) {
+      setAllBoolean((prev: any) => ({ ...prev, oneTimeBid: true }))
+    }
+  }
+  const getOneTimeBidValue = async () => {
+    try {
+      const selectedRes = await apiCall<any>('get', AUCTION_ONE_TIME_BID, {}, { auctionId: SelectedAuction.auctionId });
+      if (selectedRes.statusCode == 200) {
+        return selectedRes.data
+      } else {
+        return []
+      }
+    } catch (error) {
+
+    }
+
+  }
   const getAllAcutionItems = async () => {
     try {
       const payload = { auctionNumber: SelectedAuction.auctionNumber };
@@ -36,13 +55,9 @@ const StartBidding = () => {
       if (SelectedAuction.auctionPattern === 'Forward') {
         const res = await apiCall<any>('get', FORWARD_AUCTION_ITEM, {}, payload);
         if (res?.statusCode === 200) auctionItem = res.data || [];
-      } else {
-        const res = await apiCall<any>('get', REVERSE_AUCTION_ITEM, {}, payload);
-        if (res?.statusCode === 200) auctionItem = res.data || [];
       }
 
       const selectedRes = await apiCall<any>('get', SELECTED_AUCTION_ITEM, {}, payload);
-console.log(selectedRes,'jhhhhhhhhhh');
 
       const uniqueArray: number[] = Array.from(
         new Set(selectedRes?.data || [])
@@ -52,47 +67,96 @@ console.log(selectedRes,'jhhhhhhhhhh');
         uniqueArray.includes(item.id)
       );
 
+      if (SelectedAuction.auctionCategories == 'Live') {
+        const result = await createRoom(SelectedAuction.auctionNumber);
 
-      const result = await createRoom(SelectedAuction.auctionNumber);
-
-      subscribe(`/topic/room/${SelectedAuction.auctionNumber}`, data => {
-        console.log('🔥 BID UPDATE:', data);
-      });
-
-      const bidAmountMap2 = new Map<number, { bidAmount: number; contractorId: number }>();
-
-      (result || []).forEach((r: any) => {
-        bidAmountMap2.set(r.auctionItemId, {
-          bidAmount: r.bidAmount,
-          contractorId: r.contractorId,
+        subscribe(`/topic/room/${SelectedAuction.auctionNumber}`, data => {
+          console.log('🔥 BID UPDATE:', data);
         });
-      });
+        const bidAmountMap2 = new Map<number, { bidAmount: number; contractorId: number }>();
 
+        (result || []).forEach((r: any) => {
+          bidAmountMap2.set(r.auctionItemId, {
+            bidAmount: r.bidAmount,
+            contractorId: r.contractorId,
+          });
+        });
+        // Check One Time bid enable butoon
+        if (SelectedAuction.auctionCategories != 'Live') {
+          const myBid = result.find(
+            (bid: any) => bid.contractorId === loginUser.contractorId
+          );
 
+          if (myBid) {
+            setAllBoolean((prev: any) => ({ ...prev, oneTimeBid: true }))
+          }
+        }
 
-      const bidAmountMap = new Map<number, number>();
+        const bidAmountMap = new Map<number, number>();
 
-      (result || []).forEach((r: any) => {
-        bidAmountMap.set(r.auctionItemId, r.bidAmount);
-      });
+        (result || []).forEach((r: any) => {
+          bidAmountMap.set(r.auctionItemId, r.bidAmount);
+        });
 
-      const updatedFilteredItems = filteredItems.map(item => {
-        const bidData = bidAmountMap2.get(item.id);
-        return {
-          ...item,
-          bidAmount: bidData?.bidAmount ?? item.auctionStartValueFigure,
-          bidAvilable: bidData?.bidAmount ?? 0,
-          me: bidData?.contractorId == loginUser.contractorId ? true : false
-        };
-      });
+        const updatedFilteredItems = filteredItems.map(item => {
+          const bidData = bidAmountMap2.get(item.id);
+          return {
+            ...item,
+            bidAmount: bidData?.bidAmount ?? item.auctionStartValueFigure,
+            bidAvilable: bidData?.bidAmount ?? 0,
+            me: bidData?.contractorId == loginUser.contractorId ? true : false
+          };
+        });
 
-      const initialBids: Record<number, number> = {};
-      updatedFilteredItems.forEach(item => {
-        initialBids[item.id] = item.bidAmount;
-      });
-      setBidValues(initialBids);
-      setItems(updatedFilteredItems);
+        const initialBids: Record<number, number> = {};
+        updatedFilteredItems.forEach(item => {
+          initialBids[item.id] = item.bidAmount;
+        });
+        setBidValues(initialBids);
+        setItems(updatedFilteredItems);
+      } else {
+        let result = []
+        if (SelectedAuction.rebidAllowed) {
+          setAllBoolean((prev: any) => ({ ...prev, rebid: true }))
+        }
 
+        if (SelectedAuction.auctionCategories != 'Live') {
+          result = await getOneTimeBidValue()
+        }
+        const bidMap = new Map<number, any>();
+
+        result.forEach((bid: any) => {
+          bidMap.set(bid.auctionItemId, bid);
+        });
+        const mergedData = auctionItem.map((item: any) => {
+          const bid = bidMap.get(item.id);
+
+          if (!bid) {
+            return {
+              ...item,
+              bidAmount: item.auctionStartValueFigure,
+              contractorId: item.contractorId,
+            };
+          }
+
+          return {
+            ...item,
+            bidAmount: bid.bidAmount,
+            bidId: bid.bidId,
+            contractorId: bid.contractorId,
+            contractorName: bid.contractorName,
+            me: bid.contractorId === loginUser.contractorId,
+            bidTime: bid.bidTime,
+          };
+        });
+        const initialBids: Record<number, number> = {};
+        mergedData.forEach(item => {
+          initialBids[item.id] = item.bidAmount;
+        });
+        setBidValues(initialBids);
+        setItems(mergedData)
+        setBidValues(initialBids);
+      }
     } catch (error) {
       console.error('Error fetching auction items:', error);
     }
@@ -122,11 +186,14 @@ console.log(selectedRes,'jhhhhhhhhhh');
     }
   });
 
+
   useEffect(() => {
+    if (SelectedAuction.auctionCategories == 'One-time') {
+      getAuction()
+    }
     getAllAcutionItems();
     subscribe(`/topic/room/${SelectedAuction.auctionNumber}`, (data) => { });
-  }, []);
-
+  }, [allBoolean.reload]);
 
   useEffect(() => {
     const initial: Record<number, number> = {};
@@ -233,6 +300,8 @@ console.log(selectedRes,'jhhhhhhhhhh');
       return () => subscription.remove();
     }, [Navigation])
   );
+  // console.log(bidValues, 'jjfdlsjfldsjfl');
+
   return (
     <View style={styles.container}>
       <InsideHeader title="Bidding Panel" showArrow />
@@ -261,9 +330,11 @@ console.log(selectedRes,'jhhhhhhhhhh');
             onDecrease={() => handleUpdate(item.id, -item.bidVariationValue)}
             onPlaceBid={() => { submitBid(item) }}
             SelectedAuction={SelectedAuction}
+            allBoolean={allBoolean}
+            setAllBoolean={setAllBoolean}
           />
         )}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 300 }}
       />
 
       {allBoolean.showSuccess && (

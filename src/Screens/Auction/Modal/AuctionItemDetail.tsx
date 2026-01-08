@@ -1,60 +1,21 @@
-import React, { memo } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    ScrollView,
-    SafeAreaView,
-    Platform,
-    StatusBar,
-    Dimensions
-} from 'react-native';
+import React, { memo, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, Dimensions } from 'react-native';
 import Modal from 'react-native-modal';
-import {
-    X,
-    Package,
-    Clock,
-    Tag,
-    IndianRupee,
-    FileText,
-    Download,
-    ArrowLeft,
-    Info,
-    Layers,
-    ChevronRight
-} from 'lucide-react-native';
+import { Package, IndianRupee, FileText, Download, ArrowLeft, Info, } from 'lucide-react-native';
 import colors from '../../../Constant/Color';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAucitonItemDetail } from '../../../Services/BBPS/Hooks';
+import ReactNativeBlobUtil from 'react-native-blob-util';
+import { AUCTION_ITEM_DOCUMENT_DOWNLOAD } from '../../../Services/BBPS/ApiUrls';
+import { Loader } from '../../../Component/Index';
 
-const { width } = Dimensions.get('window');
+interface Props { visible: boolean; onClose: () => void; data?: any; }
 
-// --- Exact Dummy Data Mapping ---
-const ITEM_DUMMY_DATA = {
-    productName: "sick sari",
-    timeDuration: "112 YEAR",
-    category: "laundry",
-    subCategory: "sari",
-    reservePriceFig: "120000",
-    reservePriceWords: "One Lakh Twenty Thousand",
-    auctionStartFig: "120000",
-    auctionStartWords: "One Lakh Twenty Thousand",
-    bidVariationFig: "200",
-    bidVariationWords: "Two Hundred",
-    emdFig: "2000",
-    emdWords: "Two Thousand",
-    description: "Auction of cars",
-    documentName: "BBPS screens.pdf"
-};
-
-interface Props {
-    visible: boolean;
-    onClose: () => void;
-    data?: typeof ITEM_DUMMY_DATA;
-}
-
-const AuctionItemDetail: React.FC<Props> = ({ visible, onClose, data = ITEM_DUMMY_DATA }) => {
+const AuctionItemDetail: React.FC<Props> = ({ visible, onClose, data }) => {
     const inset = useSafeAreaInsets()
+    const [allBoolean, setAllBoolean] = useState({ fileLoading: false });
+    const { data: itemData } = useAucitonItemDetail({ auctionItemId: data.id });
+
     const Section = ({ title, icon: Icon, children }: any) => (
         <View style={styles.sectionCard}>
             <View style={styles.sectionHeader}>
@@ -74,6 +35,50 @@ const AuctionItemDetail: React.FC<Props> = ({ visible, onClose, data = ITEM_DUMM
             <Text style={styles.priceWords}>{words}</Text>
         </View>
     );
+
+    const handleDownload = async (id: number, fileName: string) => {
+        try {
+            setAllBoolean((prev: any) => ({ ...prev, fileLoading: true }));
+            const { dirs } = ReactNativeBlobUtil.fs;
+
+            // ✅ PUBLIC DOWNLOADS DIRECTORY
+            const path = `${dirs.DownloadDir}/${fileName}.pdf`;
+
+            console.log('📂 Saving to:', path);
+
+            const downloadUrl = `${AUCTION_ITEM_DOCUMENT_DOWNLOAD}?auctionItemId=${id}`;
+            console.log('🌐 Download URL:', downloadUrl);
+
+            const response = await ReactNativeBlobUtil.config({
+                fileCache: false, // important for public folder
+                addAndroidDownloads: {
+                    useDownloadManager: true,
+                    notification: true,
+                    path,
+                    mime: 'application/pdf',
+                    title: `${fileName}.pdf`,
+                    description: 'Downloading document',
+                    mediaScannable: true, // 👈 makes it visible instantly
+                },
+            }).fetch('GET', downloadUrl, {
+                Accept: 'application/pdf',
+            });
+
+            console.log('✅ Download completed');
+            console.log('📦 Status:', response.info().status);
+            console.log('📦 Headers:', response.info().headers);
+            console.log('📍 Saved at:', path);
+
+            const stat = await ReactNativeBlobUtil.fs.stat(path);
+            console.log('📦 File size:', stat.size);
+
+        } catch (error: any) {
+            console.log('❌ Download failed');
+            console.log('❌ Error:', error?.message || error);
+        } finally {
+            setAllBoolean((prev: any) => ({ ...prev, fileLoading: false }));
+        }
+    };
 
     return (
         <Modal
@@ -106,72 +111,76 @@ const AuctionItemDetail: React.FC<Props> = ({ visible, onClose, data = ITEM_DUMM
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                 >
-                    {/* Product Identity Card */}
                     <Section title="Product Specification" icon={Package}>
                         <View style={styles.identityHeader}>
                             <Text style={styles.productNameText}>{data.productName.toUpperCase()}</Text>
                             <View style={styles.categoryBadge}>
-                                <Text style={styles.categoryText}>{data.category}</Text>
+                                <Text style={styles.categoryText}>{data.categoryName}</Text>
                             </View>
                         </View>
 
                         <View style={styles.specGrid}>
                             <View style={styles.specItem}>
                                 <Text style={styles.label}>Sub Category</Text>
-                                <Text style={styles.specValue}>{data.subCategory}</Text>
+                                <Text style={styles.specValue}>{data.subCategoryName}</Text>
                             </View>
                             <View style={styles.specItem}>
                                 <Text style={styles.label}>Duration</Text>
-                                <Text style={styles.specValue}>{data.timeDuration}</Text>
+                                <Text style={styles.specValue}>{data.timeDurationType}</Text>
                             </View>
                         </View>
                     </Section>
 
-                    {/* Pricing & Financials */}
                     <Section title="Reserve & Bid Values" icon={IndianRupee}>
                         <PriceTile
                             label="Reserve Price"
-                            fig={data.reservePriceFig}
-                            words={data.reservePriceWords}
+                            fig={data.reservePrice}
+                            words={data.reservePriceInWords}
                             full
                         />
                         <View style={styles.hDivider} />
                         <PriceTile
                             label="Auction Start Value"
-                            fig={data.auctionStartFig}
-                            words={data.auctionStartWords}
+                            fig={data.reservePrice}
+                            words={data.reservePriceInWords}
                             full
                         />
                         <View style={styles.hDivider} />
-                        <View style={styles.row}>
+                        {/* <View style={styles.row}>
                             <PriceTile label="Bid Variation" fig={data.bidVariationFig} words={data.bidVariationWords} />
-                            <PriceTile label="EMD Amount" fig={data.emdFig} words={data.emdWords} />
-                        </View>
+                            <PriceTile label="Auction Start Value" fig={data.auctionStartValue} words={data.auctionStartValueInWords
+                            } />
+                        </View> */}
                     </Section>
 
-                    {/* Description Card */}
                     <Section title="Brief Description" icon={Info}>
-                        <Text style={styles.descContent}>{data.description}</Text>
+                        <Text style={styles.descContent}>{data.briefDescription}</Text>
                     </Section>
 
-                    {/* Documents Card */}
-                    <Section title="View Documents" icon={FileText}>
+                    {itemData?.length && <Section title="View Documents" icon={FileText}>
                         <View style={styles.docTableHead}>
                             <Text style={styles.tableLabel}>Sr No.</Text>
                             <Text style={[styles.tableLabel, { flex: 2 }]}>Document Name</Text>
                             <Text style={styles.tableLabel}>Action</Text>
                         </View>
 
-                        <TouchableOpacity style={styles.docRow} activeOpacity={0.7}>
-                            <Text style={styles.docIndex}>1</Text>
-                            <View style={{ flex: 2 }}>
-                                <Text style={styles.docTitle} numberOfLines={1}>{data.documentName}</Text>
-                            </View>
-                            <View style={styles.downloadIconBox}>
-                                <Download size={18} color={colors.primary} />
-                            </View>
-                        </TouchableOpacity>
-                    </Section>
+                        {itemData?.map((doc: any, index: any) => (
+                            <TouchableOpacity style={styles.docRow} activeOpacity={0.7} onPress={() => { handleDownload(doc.assetId, doc.fileName) }} key={index}>
+                                <Text style={styles.docIndex}>{index + 1}</Text>
+                                <View style={{ flex: 2 }}>
+                                    <Text style={styles.docTitle} numberOfLines={1}>{doc.fileName}</Text>
+                                </View>
+                                <View style={styles.downloadIconBox}>
+                                    {allBoolean.fileLoading ? (
+                                        <View >
+                                            <Loader size='small' color='#94a3b8' />
+                                        </View>
+                                    ) : (
+                                        <Download size={20} color={colors.primary} />
+                                    )}
+                                </View>
+                            </TouchableOpacity>))}
+                    </Section>}
 
                 </ScrollView>
             </View>
