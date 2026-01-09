@@ -93,14 +93,14 @@ const Emd = () => {
                         <Text style={styles.subText}>EMD ₹ {item.emdAmount}</Text>
                     </View>
 
-                    <BouncyCheckbox
+                    {/* <BouncyCheckbox
                         size={20}
                         fillColor={colors.primary}
                         iconStyle={{ borderRadius: 5, borderWidth: 1.5, borderColor: colors.primary }}
                         innerIconStyle={{ borderRadius: 6 }}
                         isChecked={selected}
                         onPress={(checked) => toggleSelect(item, checked)}
-                    />
+                    /> */}
                 </View>
 
                 <Text style={styles.meta}>

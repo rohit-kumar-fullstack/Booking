@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
-import { fetchAuctionItem, fetchDashboard, fetchEmdCheck, fetchLiveAuction, fetchLiveTender, fetchPurchaseAuction, fetchPurchaseAuctionList, fetchPurchaseTender, getAuction, offlineAuctionPurchase, userLogin, viewAuctionDocumentDownload, viewAuctionDocuments, viewAuctionItemDocuments } from './apis';
+import { fetchAuctionItem, fetchDashboard, fetchEmdCheck, fetchLiveAuction, fetchLiveTender, fetchPurchaseAuction, fetchPurchaseAuctionList, fetchPurchaseTender, getAuction, offlineAuctionPurchase, userLogin, offlineTenderPurchase, fetchTenderById, proceedToBid, viewAuctionDocumentDownload, viewAuctionDocuments, viewAuctionItemDocuments } from './apis';
 
 // User
 
@@ -20,15 +20,38 @@ export const useDashboard = () => {
 // Auction & Tender
 
 export const useFetchPurchaseTender = () => {
-    return useQuery({
-        queryKey: [],
-        queryFn: () => fetchPurchaseTender()
+    return useInfiniteQuery({
+        queryKey: ['fetchPurchaseTender'],
+        queryFn: ({ pageParam = 0 }) =>
+            fetchPurchaseTender({
+                page: pageParam,
+                size: 10,
+            }),
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages) => {
+            console.log('last page : ', lastPage)
+            console.log("all page : ", allPages)
+            const {totalCount } = lastPage;
+
+            const totalPages = Math.ceil(totalCount / 10);
+            const nextPage = allPages.length;
+            return nextPage < totalPages ? nextPage : undefined;
+        },
+
+        select: (data) => ({
+            ...data,
+            result: data.pages.flatMap(
+                (page: any) => page?.data ?? []
+            ),
+        }),
     });
 };
 
+
+
 export const useFetchLiveTender = () => {
     return useQuery({
-        queryKey: [],
+        queryKey: ['fetchLiveTender',],
         queryFn: () => fetchLiveTender()
     });
 };
@@ -78,6 +101,30 @@ export const useOfflineAuctionPurchase = () => {
         mutationFn: (payload: any) => offlineAuctionPurchase(payload),
     });
 };
+export const useOfflineTenderPurchase = () => {
+    return useMutation({
+        mutationFn: (payload: any) => offlineTenderPurchase(payload),
+    });
+};
+
+export const useFetchTenderById = (tenderId: string) => {
+    return useQuery({
+        queryKey: ['fetchTenderById', tenderId],
+        queryFn: () => fetchTenderById(tenderId)
+
+    });
+}
+
+export const useProceedToBid = (tenderId?: string) => {
+    return useQuery({
+        queryKey: ['proceedToBid', tenderId],
+        queryFn: () => proceedToBid(tenderId as string),
+        enabled: false, // 👈 manual trigger
+    });
+};
+
+
+
 
 // EMD
 export const useEmdCheck = () => {
