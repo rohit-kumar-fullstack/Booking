@@ -13,20 +13,17 @@ export const apiCall = async <R, D = {}>(
   try {
     const token: any = store.getState().token.token;
 
-    console.log("token : ", token)
     const response = await axios({
       method,
       url,
       data,
       params,
       // withCredentials: true,
-      baseURL: Variable.Main_Base,
       headers: {
         Authentication: `Bearer ${token?.token}`,
         'Content-Type': contentType || 'application/json',
       },
     });
-    console.log("url : ", url)
     return response.data;
   } catch (error: any) {
     const errorMessage = error?.response?.data?.error;

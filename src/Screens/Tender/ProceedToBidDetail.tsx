@@ -2,85 +2,24 @@ import { StyleSheet, Text, View, ScrollView, StatusBar, TouchableOpacity } from 
 import React from 'react'
 import { InsideHeader } from '../../Component/Index'
 import colors from '../../Constant/Color'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useRoute } from '@react-navigation/native'
+import { useProceedToBid } from '../../Services/BBPS/Hooks'
 
 const ProceedToBidDetail = () => {
     // Sample data based on your JSON
-    const navigation = useNavigation<any>()
-    const tenderData = {
-        tenderId: 1372,
-        envelopeASubmittStatus: true,
-        envelopeBSubmittStatus: true,
-        envelopeCSubmittStatus: true,
-        envelopeA_Logs: {
-            logId: 314,
-            contractorId: 1,
-            activity: "Bid on Envelope A",
-            tenderId: 1372,
-            dateTime: "Fri Dec 12 13:07:44 IST 2025",
-            osName: "Linux",
-            browserName: "Chrome-142.0.0.0",
-            ipAddress: "192.168.5.10",
-            macAddress: "00:00:00:00:00:00",
-            logMessage: "Envelope A bidding is Submitted",
-            headingMsg: null,
-            status: null,
-            envelope: "EA"
-        },
-        envelopeB_Logs: {
-            logId: 315,
-            contractorId: 1,
-            activity: "Bid on Envelope B",
-            tenderId: 1372,
-            dateTime: "Fri Dec 12 13:08:00 IST 2025",
-            osName: "Linux",
-            browserName: "Chrome-142.0.0.0",
-            ipAddress: "192.168.5.10",
-            macAddress: "00:00:00:00:00:00",
-            logMessage: "Envelope B bidding is Submitted",
-            headingMsg: null,
-            status: null,
-            envelope: "EB"
-        },
-        envelopeC_Logs: {
-            logId: 316,
-            contractorId: 1,
-            activity: "Bid on Envelope C",
-            tenderId: 1372,
-            dateTime: "Fri Dec 12 13:08:31 IST 2025",
-            osName: "Linux",
-            browserName: "Chrome-142.0.0.0",
-            ipAddress: "192.168.5.10",
-            macAddress: "00:00:00:00:00:00",
-            logMessage: "Envelope C bidding is Submitted",
-            headingMsg: "Percentage Rate Tender",
-            status: null,
-            envelope: "EC"
-        },
-        showEB: true,
-        showEC: true,
-        showQCBS: false,
-        showLCS: false,
-        viewBid: true,
-        proceedtoBid: false,
-        tenderNumber: "TN/152",
-        emdInFig: "100",
-        tenderBidWithdraw: "Allowed",
-        tenderRebid: "Allowed",
-        nitNo: "NIT-410",
-        nameofWork: "Tender is created for Testing Process only",
-        reBid: "Allowed",
-        bidWithDraw: "Allowed",
-        envelopeType: "3",
-        biddingStatus: true,
-        tenderStages: "1",
-        dscStatus: false,
-        submittedStartDate: [2025, 3, 4, 10, 0],
-        submittedEndDate: [2026, 3, 4, 23, 50],
-        bidWithdrawStatus: true
-    };
+    const route = useRoute()
+    const tenderData = route.params?.tender;
+    const {data, refetch} = useProceedToBid(tenderData?.tenderId);
 
+    const navigation = useNavigation<any>()
     // Format date from array
+
+    const handleStartBidding = () => {
+        refetch();
+        if (data) {
+        navigation.navigate('TenderBidding', { tenderData: tenderData , bidData: data.data });
+        }
+    }
     const formatDate = (dateArray: any[]) => {
         if (!dateArray || dateArray.length < 3) return "N/A";
         const [year, month, day, hour = 0, minute = 0] = dateArray;
@@ -103,39 +42,39 @@ const ProceedToBidDetail = () => {
             <View style={styles.cardHeader}>
                 <Text style={styles.cardTitle}>{title}</Text>
                 <View style={[styles.envelopeBadge, { backgroundColor: colors.primary }]}>
-                    <Text style={styles.envelopeBadgeText}>{log.envelope}</Text>
+                    <Text style={styles.envelopeBadgeText}>{log?.envelope}</Text>
                 </View>
             </View>
 
             <View style={styles.logDetailRow}>
                 <Text style={styles.label}>Activity:</Text>
-                <Text style={styles.value}>{log.activity}</Text>
+                <Text style={styles.value}>{log?.activity}</Text>
             </View>
 
             <View style={styles.logDetailRow}>
                 <Text style={styles.label}>Date & Time:</Text>
-                <Text style={styles.value}>{log.dateTime}</Text>
+                <Text style={styles.value}>{log?.dateTime}</Text>
             </View>
 
             <View style={styles.logDetailRow}>
                 <Text style={styles.label}>System Info:</Text>
-                <Text style={styles.value}>{log.osName} / {log.browserName}</Text>
+                <Text style={styles.value}>{log?.osName} / {log?.browserName}</Text>
             </View>
 
             <View style={styles.logDetailRow}>
                 <Text style={styles.label}>IP Address:</Text>
-                <Text style={styles.value}>{log.ipAddress}</Text>
+                <Text style={styles.value}>{log?.ipAddress}</Text>
             </View>
 
             <View style={styles.logDetailRow}>
                 <Text style={styles.label}>Status Message:</Text>
-                <Text style={[styles.value, styles.successText]}>{log.logMessage}</Text>
+                <Text style={[styles.value, styles.successText]}>{log?.logMessage}</Text>
             </View>
 
-            {log.headingMsg && (
+            {log?.headingMsg && (
                 <View style={styles.logDetailRow}>
                     <Text style={styles.label}>Heading:</Text>
-                    <Text style={styles.value}>{log.headingMsg}</Text>
+                    <Text style={styles.value}>{log?.headingMsg}</Text>
                 </View>
             )}
         </View>
@@ -278,23 +217,19 @@ const ProceedToBidDetail = () => {
 
                 <View style={styles.footerSpace} />
             </ScrollView>
-            <View style={styles.footer}> 
-                 <TouchableOpacity style={styles.proceedButton} onPress={() => {
-                       navigation.navigate('TenderBidding', { tenderData: tenderData });
-                    }}>
-                        <Text style={styles.proceedButtonText}>Proceed to Bid</Text>
-                    </TouchableOpacity>
-                 {
-                // tenderData?.proceedtoBid && !tenderData?.viewBid && tenderData?.biddingStatus && tenderData?.bidWithdrawStatus === false ? (
 
-                //     <TouchableOpacity style={styles.proceedButton} onPress={() => {
-                //        navigation.navigate('TenderBidding', { tenderData: tenderData });
-                //     }}>
-                //         <Text style={styles.proceedButtonText}>Proceed to Bid</Text>
-                //     </TouchableOpacity>
 
-                // ) : <Text style={styles.footerText}>One time bidding is completed</Text>
-            } </View>
+
+            <View style={styles.footer}>
+                {
+                    tenderData?.proceedtoBid && !tenderData?.viewBid && tenderData?.biddingStatus && tenderData?.bidWithdrawStatus === false ? (
+
+                        <TouchableOpacity style={styles.proceedButton} onPress={handleStartBidding}>
+                            <Text style={styles.proceedButtonText}>Start Bidding</Text>
+                        </TouchableOpacity>
+
+                    ) : <Text style={styles.footerText}>One time bidding is completed</Text>
+                } </View>
         </View>
 
     )

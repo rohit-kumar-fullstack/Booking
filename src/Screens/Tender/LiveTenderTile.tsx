@@ -6,6 +6,7 @@ import { LiveTenderTileProps } from './types/types';
 import { Calendar, Tag, Info, ArrowRight } from 'lucide-react-native';
 import TenderDetail from './Modal/TenderFullDetail';
 import TenderFullDetail from './Modal/TenderFullDetail';
+import { useNavigation } from '@react-navigation/native';
 
 const LiveTenderTile: React.FC<LiveTenderTileProps> = ({
   data,
@@ -16,10 +17,12 @@ const LiveTenderTile: React.FC<LiveTenderTileProps> = ({
   purchaseEnd,
   tenderFees,
   tenderNumber,
+  onDetailsPress
 }) => {
-  const [showDetail, setShowDetail] = React.useState(false);
+  const navigation: any = useNavigation();
   const purchaseEnded = moment().isAfter(moment(purchaseEnd, 'DD-MM-YYYY HH:mm:ss'));
 
+  console.log("live tender data : ", data)
   return (
     <View style={styles.cardWrapper}>
       {/* Status Tag */}
@@ -33,7 +36,7 @@ const LiveTenderTile: React.FC<LiveTenderTileProps> = ({
       <TouchableOpacity
         style={styles.container}
         activeOpacity={0.9}
-        onPress={() => setShowDetail(true)}
+        onPress={() => navigation.navigate('LiveTenderDetail', data)}
       >
         {/* Header */}
         <View style={styles.header}>
@@ -72,7 +75,7 @@ const LiveTenderTile: React.FC<LiveTenderTileProps> = ({
 
         {/* Action Bar */}
         <View style={styles.actionBar}>
-          <TouchableOpacity style={styles.iconBtn} onPress={() => setShowDetail(true)}>
+          <TouchableOpacity style={styles.iconBtn} onPress={onDetailsPress}>
             <Info size={18} color={colors.primary} />
             <Text style={styles.iconBtnText}>Details</Text>
           </TouchableOpacity>
@@ -104,7 +107,7 @@ const LiveTenderTile: React.FC<LiveTenderTileProps> = ({
         </View>
 
         {/* Tender Detail Modal */}
-        <TenderFullDetail visible={showDetail} data={data} onClose={() => setShowDetail(false)} />
+        {/* <TenderFullDetail visible={showDetail} data={data} onClose={() => setShowDetail(false)} /> */}
       </TouchableOpacity>
     </View>
   );

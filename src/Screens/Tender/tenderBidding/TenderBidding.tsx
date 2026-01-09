@@ -53,6 +53,7 @@ const TenderBidding = () => {
     const navigation = useNavigation();
 
     const [bidData] = useState<any>(route.params?.tenderData || null);
+    const tenderData = route.params?.bidData || null;
     const [activeEnvelope, setActiveEnvelope] = useState<EnvelopeType | null>('A');
     const [isLoading, setIsLoading] = useState(false);
     const [envelopForm, setEnvelopForm] = useState<EnvelopeFormState>({
@@ -227,9 +228,9 @@ const TenderBidding = () => {
     };
 
     const hasEnvelopes = () => {
-        const hasA = bidData?.tenderEnvelopeAList?.length > 0;
-        const hasB = bidData?.tenderEnvelopeBList?.length > 0;
-        // const hasC = bidData?.tenderEnvelopeCList?.length > 0;
+        const hasA = tenderData?.tenderEnvelopeAList?.length > 0;
+        const hasB = tenderData?.tenderEnvelopeBList?.length > 0;
+        // const hasC = tenderData?.tenderEnvelopeCList?.length > 0;
         return hasA || hasB;
     };
 
@@ -442,7 +443,8 @@ const TenderBidding = () => {
         );
     }
 
-    console.log("route for date : ", route.params)
+    // console.log("route for date : ", bidData)
+    // console.log("bid envelop : ", tenderData)
     return (
         <View style={styles.container}>
             <InsideHeader title="Tender Bidding Start" showArrow />
@@ -467,20 +469,19 @@ const TenderBidding = () => {
                 <View style={styles.card}>
                     <Text style={styles.sectionTitle}>Bid Envelopes</Text>
                     <View style={styles.envelopeRow}>
-                        {bidData?.showEA && (
+                        {tenderData?.showEA && (
                             <EnvelopeButton
                                 title="Envelope A"
                                 envelopeType="A"
                                 onPress={() => setActiveEnvelope('A')}
                             />
                         )}
-                        {bidData?.showEB && (
+                        {tenderData?.showEB && (
                             <EnvelopeButton
                                 title="Envelope B"
                                 envelopeType="B"
                                 onPress={() => {
-                                    if
-                                        (bidData?.envelopeASubmittStatus) {
+                                    if (tenderData?.envelopeASubmittStatus) {
                                         setActiveEnvelope('B')
                                     } else {
                                         Alert.alert('Info', 'First Fill Envelop A First')
@@ -488,7 +489,7 @@ const TenderBidding = () => {
                                 }}
                             />
                         )}
-                        {bidData?.showEC && (
+                        {tenderData?.showEC && (
                             <EnvelopeButton
                                 title="Envelope C"
                                 envelopeType="C"
@@ -498,11 +499,11 @@ const TenderBidding = () => {
                     </View>
                 </View>
                 {/* Envelope A List */}
-                {bidData?.[`tenderEnvelope${activeEnvelope}List`]?.length > 0 && activeEnvelope !== 'C' && (
+                {tenderData?.[`tenderEnvelope${activeEnvelope}List`]?.length > 0 && activeEnvelope !== 'C' && (
                     <View style={styles.card}>
                         <Text style={styles.sectionTitle}>Envelope {activeEnvelope} Details</Text>
                         <FlatList
-                            data={bidData?.[`tenderEnvelope${activeEnvelope}List`]}
+                            data={tenderData?.[`tenderEnvelope${activeEnvelope}List`]}
                             keyExtractor={(item) => item?.[`tenderEnvelope${activeEnvelope}SequnceId`]?.toString()}
                             renderItem={({ item }) => renderEnvelopeItem({ item, envelopeType: activeEnvelope })}
                             scrollEnabled={false}

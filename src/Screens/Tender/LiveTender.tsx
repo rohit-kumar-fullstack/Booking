@@ -57,8 +57,8 @@ const LiveTender = () => {
                 tenderOfWork={item.departmentName}
                 tenderFees={item.documentFees}
                 tenderNumber={item.tenderNumber}
-                onPurchasePress={() => { Dispatch(togglePurchaseTender(item)) }}
-                onDetailsPress={() => { }}
+                // onPurchasePress={() => { Dispatch(togglePurchaseTender(item)) }}
+                // onDetailsPress={() => navigation.navigate('LiveTenderDetail', {item})}
             />
         },
         [SelectedPurchaseList]

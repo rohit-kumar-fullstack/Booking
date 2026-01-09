@@ -40,6 +40,7 @@ export default function MainStack() {
       <Stack.Screen name={NavigationString.ProceedToPurTender} component={Screens.ProceedToPurTender} options={option} />
       <Stack.Screen name={NavigationString.TenderBidding} component={Screens.TenderBidding} options={option} />
       <Stack.Screen name={NavigationString.ProceedToBidDetail} component={Screens.ProceedToBidDetail} options={option} />
+      <Stack.Screen name={NavigationString.LiveTenderDetail} component={Screens.LiveTenderDetail} options={option} />
 
     </Stack.Navigator>
   );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { use, useEffect } from 'react';
 import {
   View,
   Text,
@@ -33,21 +33,17 @@ const PurchaseTenderTile = ({
     elevation: elevation.value,
   }));
 
-   const { data: tenderResponse,  }: any = useFetchTenderById(item?.tenderId);
-    const tender = tenderResponse?.data;
+  const { data: tenderResponse, }: any = useFetchTenderById(item?.tenderId);
+  const tender = tenderResponse?.data;
 
-  // const {
-  //   refetch,
-  //   isFetching,
-  //   isError,
-  // } = useProceedToBid(item?.tenderId);
+  // console.log("item my : ", item)
 
-  // const handleProceed = async (item: any) => {
-  //   const res = await refetch();
-  //   if (res.data && !isError) {
-  //     navigation.navigate('TenderBidding', { tenderData: res.data?.data });
-  //   }
-  // };
+  {
+    if (item?.nitNumber == 'TN/111') {
+      console.log("tender item : ", item?.nitNumber)
+
+    }
+  }
 
   const handlePressIn = () => {
     scale.value = withTiming(0.97, { duration: 120 });
@@ -59,11 +55,17 @@ const PurchaseTenderTile = ({
     elevation.value = withTiming(8, { duration: 160 });
   };
 
-  const isLive = item?.liveStatus === true;
+  const isLive = item?.biddingStatus === true;
 
   const statusColor = isLive ? colors.primary : '#94A3B8';
   const lightStatusBg = isLive ? '#EFF6FF' : '#F8FAFC';
   const [showDetail, setShowDetail] = React.useState(false);
+
+  useEffect(() => { 
+    if(item?.tenderNumber == 'TN/210'){
+      console.log("tender item : ", item)
+    }
+  }, [item]);
 
   return (
     <Animated.View
@@ -105,11 +107,11 @@ const PurchaseTenderTile = ({
             setShowDetail(true)
           }}>
             <Text style={styles.dateText}>
-              <Text style={styles.dateLabel}>Purchase Ends: </Text>
+              <Text style={styles.dateLabel}>Bid Ends: </Text>
               {moment(
-                item?.tenderKeyDatesAmendment?.tenderPurchaseDate?.endDateTime,
+                item?.keydates?.bidSubmissionDate?.endDateTime,
                 'DD-MM-YYYY HH:mm:ss'
-              ).format('DD MMM, hh:mm A')}
+              ).format('DD MMM YYYY, hh:mm A')}
             </Text>
           </TouchableOpacity>
 
@@ -121,7 +123,7 @@ const PurchaseTenderTile = ({
               {isLive ? (
                 <CountdownTimer
                   endDate={
-                    item?.tenderKeyDatesAmendment?.tenderPurchaseDate?.endDateTime
+                    item?.keydates?.bidSubmissionDate?.endDateTime
                   }
                 />
               ) : (
@@ -133,7 +135,7 @@ const PurchaseTenderTile = ({
               disabled={!isLive}
               onPress={() => {
                 if (isLive) {
-                   navigation.navigate('ProceedToBidDetail', { tender });
+                  navigation.navigate('ProceedToBidDetail', { tender });
                 }
               }}
               activeOpacity={0.85}

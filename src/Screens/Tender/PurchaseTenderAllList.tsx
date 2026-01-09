@@ -23,6 +23,8 @@ const PurchaseTenderAllList = () => {
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isRefetching, refetch }: any = useFetchPurchaseTender();
     const [showRefreshBanner, setShowRefreshBanner] = useState(false);
 
+
+    console.log("data for tender : ", data)
     useEffect(() => {
         if (isRefetching) {
             setShowRefreshBanner(true);

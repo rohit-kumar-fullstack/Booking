@@ -1,6 +1,3 @@
-import ProceedToBidDetail from "../Screens/Tender/ProceedToBidDetail"
-import TenderBidding from "../Screens/Tender/tenderBidding/TenderBidding"
-
 const NavigationString = {
     Login: 'Login',
     Splash: 'Splash',
@@ -17,5 +14,6 @@ const NavigationString = {
     ProceedToPurTender:'ProceedToPurTender',
     TenderBidding:'TenderBidding',
     ProceedToBidDetail:'ProceedToBidDetail',
+    LiveTenderDetail:'LiveTenderDetail',
 }
 export default NavigationString
