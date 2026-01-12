@@ -37,17 +37,17 @@ const SideDrawer: React.FC<Props> = ({ visible, onClose }) => {
       onPress: () => navigation.navigate(NavigationString.Home),
     },
     {
-      label: 'Auctions',
-      icon: Gavel,
-      onPress: () => navigation.navigate(NavigationString.Auction),
-    },
-    {
-      label: 'Tenders',
-      icon: FileText,
-      onPress: () => navigation.navigate(NavigationString.Tender),
-    },
-    {
       label: 'Profile',
+      icon: Gavel,
+      onPress: () => { }
+    },
+    {
+      label: 'Privacy Policy',
+      icon: FileText,
+      onPress: () => { },
+    },
+    {
+      label: 'Terms & Conditions',
       icon: User,
       onPress: () => { },
     },
@@ -65,7 +65,6 @@ const SideDrawer: React.FC<Props> = ({ visible, onClose }) => {
       useNativeDriver
     >
       <Animated.View style={[styles.drawer, drawerStyle]}>
-        {/* ================= Header / Profile ================= */}
         <View style={styles.profileHeader}>
           <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
             <X size={20} color="#111827" />
@@ -77,7 +76,6 @@ const SideDrawer: React.FC<Props> = ({ visible, onClose }) => {
           <Text style={styles.userRole}>{user.role}</Text>
         </View>
 
-        {/* ================= Menu ================= */}
         <View style={styles.menuContainer}>
           {menuItems.map((item, index) => {
             const Icon = item.icon;
@@ -118,7 +116,6 @@ const SideDrawer: React.FC<Props> = ({ visible, onClose }) => {
           })}
         </View>
 
-        {/* ================= Logout ================= */}
         <View style={styles.logoutContainer}>
           <TouchableOpacity
             style={styles.logoutBtn}

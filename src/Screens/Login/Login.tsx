@@ -6,15 +6,13 @@ import * as Yup from 'yup';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react-native';
 import colors from '../../Constant/Color';
-import ImagePath from '../../Constant/ImagePath';
-import { useLogin } from '../../Services/BBPS/Hooks';
-import { useDispatch } from 'react-redux';
-import { setToken } from '../../Redux/Slices/Token';
-import { showErrorAlert } from '../../Constant/ShowDailog';
 import { useNavigation, CommonActions } from '@react-navigation/native';
-import NavigationString from '../../Constant/NavigationString';
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
 import { Loader } from '../../Component/Index';
+import FontsFamily from '../../Constant/FontsFamily';
+import NavigationString from '../../Constant/NavigationString';
+import { useDispatch } from 'react-redux';
+import { setToken } from '../../Redux/Slices/Token';
 const hapticOptions = {
   enableVibrateFallback: true,
   ignoreAndroidSystemSettings: false
@@ -28,33 +26,23 @@ const LoginSchema = Yup.object().shape({
 
 const Login = () => {
   const Navigation: any = useNavigation()
-  const Dispatch = useDispatch()
   const [passwordVisible, setPasswordVisible] = React.useState(false);
   const [loading, setLoading] = useState(false)
-  const { mutate } = useLogin()
-
+  const Dispatch = useDispatch();
   const HandleLogin = async (values: any) => {
     setLoading(true)
-    mutate({ password: values.password, emailAdd: values.email }, {
-      onSuccess: (res) => {
-        if (res.statusCode == 200) {
-          Dispatch(setToken({ ...res.data, token: res.token }))
-          Navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [
-                { name: NavigationString.Home },
-              ],
-            })
-          );
-        }
-        setLoading(false)
-      },
-      onError: (err) => {
-        showErrorAlert(err.message)
-        setLoading(false)
-      }
-    })
+
+    setTimeout(() => {
+      setLoading(false)
+      Dispatch(setToken({ token: 'dummy-auth-token' }));
+      Navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: NavigationString.Home }],
+        })
+      );
+    }, 1500);
+
   }
 
   return (
@@ -71,12 +59,12 @@ const Login = () => {
               colors={[colors.primary, colors.primaryLight || '#4c669f']}
               style={styles.gradient}
             >
-              <Animated.Image
+              <Animated.Text
                 entering={FadeInDown.delay(200).duration(800)}
-                source={ImagePath.Icon.Logo}
-                resizeMode="contain"
                 style={styles.logo}
-              />
+              >
+                Add  Logo
+              </Animated.Text>
             </LinearGradient>
           </View>
 
@@ -183,8 +171,9 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 0,
   },
   logo: {
-    height: 200,
-    width: 200,
+    fontSize: 32,
+    color: colors.black,
+    fontFamily: FontsFamily.poppinsSemiBold
   },
   formContainer: {
     flex: 1,

@@ -3,7 +3,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import NavigationString from '../Constant/NavigationString';
 import Screens from '../Screens';
 import colors from '../Constant/Color';
-import BottomTab from './Bottom';
 
 export default function MainStack() {
   const Stack = createStackNavigator();
@@ -31,17 +30,8 @@ export default function MainStack() {
       <Stack.Screen name={NavigationString.Splash} component={Screens.Splash} options={option} />
       <Stack.Screen name={NavigationString.Onboarding} component={Screens.Onboarding} options={option} />
       <Stack.Screen name={NavigationString.Login} component={Screens.Login} options={option} />
-      <Stack.Screen name={NavigationString.Home} component={BottomTab} options={option} />
-      <Stack.Screen name={NavigationString.PurchaseList} component={Screens.PurchaseList} options={option} />
-      <Stack.Screen name={NavigationString.Emd} component={Screens.Emd} options={option} />
-      <Stack.Screen name={NavigationString.StartBidding} component={Screens.StartBidding} options={option} />
-      <Stack.Screen name={NavigationString.PurchaseAuctionList} component={Screens.PurchaseAuctionList} options={option} />
-      <Stack.Screen name={NavigationString.PurchaseTenderList} component={Screens.PurchaseTenderList} options={option} />
-      <Stack.Screen name={NavigationString.ProceedToPurTender} component={Screens.ProceedToPurTender} options={option} />
-      <Stack.Screen name={NavigationString.TenderBidding} component={Screens.TenderBidding} options={option} />
-      <Stack.Screen name={NavigationString.ProceedToBidDetail} component={Screens.ProceedToBidDetail} options={option} />
-      <Stack.Screen name={NavigationString.LiveTenderDetail} component={Screens.LiveTenderDetail} options={option} />
-      <Stack.Screen name={NavigationString.StartReverseBidding} component={Screens.StartReverseBidding} options={option} />
+      <Stack.Screen name={NavigationString.Home} component={Screens.Home} options={option} />
+
 
     </Stack.Navigator>
   );

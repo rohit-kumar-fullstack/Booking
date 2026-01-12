@@ -9,14 +9,12 @@ import { persistor, store } from './src/Redux/Store.js';
 import Routes from './src/Navigation/Routes.jsx';
 import { NavigationContainer } from '@react-navigation/native';
 import colors from './src/Constant/Color';
-import { TextEncoder } from 'text-encoding';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 LogBox.ignoreAllLogs(true);
 
 const App = () => {
   const queryClient = new QueryClient();
   const insets = useSafeAreaInsets()
-  global.TextEncoder = TextEncoder;
   return (
     <NavigationContainer >
       <QueryClientProvider client={queryClient}>

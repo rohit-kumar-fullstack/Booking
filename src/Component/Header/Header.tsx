@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Menu } from 'lucide-react-native';
+import { Bell, Menu } from 'lucide-react-native';
 import colors from '../../Constant/Color';
 import ImagePath from '../../Constant/ImagePath';
 import FontsFamily from '../../Constant/FontsFamily';
@@ -25,7 +25,7 @@ const Header: React.FC<HeaderProps> = ({ title, showDrawer = true }) => {
         colors={[colors.white, 'rgba(255,255,255,0.8)']}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
-        style={[styles.container, { paddingTop: insets.top + 10 }]}
+        style={[styles.container, { paddingTop: insets.top }]}
       >
         <View style={styles.row}>
           <View style={styles.left}>
@@ -41,11 +41,9 @@ const Header: React.FC<HeaderProps> = ({ title, showDrawer = true }) => {
             <Text style={styles.title}>{title}</Text>
           </View>
 
-          <Image
-            source={ImagePath.Icon.Logo2}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          <TouchableOpacity style={{ padding: 6 }} activeOpacity={0.7}>
+            <Bell size={22} color={colors.black} strokeWidth={2.5} />
+          </TouchableOpacity>
         </View>
       </LinearGradient>
 
