@@ -1,12 +1,5 @@
 import React, { FC, useRef, useEffect } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  Animated,
-  Platform,
-} from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Animated, Platform } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { BlurView } from '@react-native-community/blur';
 import colors from '../../Constant/Color';

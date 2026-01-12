@@ -1,29 +1,14 @@
 import React, { use, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Platform,
-  Alert,
-} from 'react-native';
-import Animated, {
-  FadeInUp,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import moment from 'moment';
 import CountdownTimer from '../../Component/Counter/CountdownTimer';
 import colors from '../../Constant/Color';
-import { useFetchTenderById, useProceedToBid } from '../../Services/BBPS/Hooks';
+import { useFetchTenderById } from '../../Services/BBPS/Hooks';
 import { useNavigation } from '@react-navigation/native';
 import TenderFullDetail from './Modal/TenderFullDetail';
 
-const PurchaseTenderTile = ({
-  item,
-  onPressDetails,
-}: any) => {
+const PurchaseTenderTile = ({ item, onPressDetails }: any) => {
   const scale = useSharedValue(1);
   const elevation = useSharedValue(8);
   const navigation = useNavigation<any>();
@@ -35,15 +20,6 @@ const PurchaseTenderTile = ({
 
   const { data: tenderResponse, }: any = useFetchTenderById(item?.tenderId);
   const tender = tenderResponse?.data;
-
-  // console.log("item my : ", item)
-
-  {
-    if (item?.nitNumber == 'TN/111') {
-      console.log("tender item : ", item?.nitNumber)
-
-    }
-  }
 
   const handlePressIn = () => {
     scale.value = withTiming(0.97, { duration: 120 });
@@ -61,11 +37,6 @@ const PurchaseTenderTile = ({
   const lightStatusBg = isLive ? '#EFF6FF' : '#F8FAFC';
   const [showDetail, setShowDetail] = React.useState(false);
 
-  useEffect(() => { 
-    if(item?.tenderNumber == 'TN/210'){
-      console.log("tender item : ", item)
-    }
-  }, [item]);
 
   return (
     <Animated.View

@@ -1,9 +1,7 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import LottieView from "lottie-react-native";
 import LinearGradient from "react-native-linear-gradient";
-
-const { width } = Dimensions.get("window");
 
 const InternetConnectivity = () => {
   return (

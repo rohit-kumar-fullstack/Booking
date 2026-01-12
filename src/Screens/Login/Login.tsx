@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Dimensions, TextInput, TouchableOpacity, StyleSheet, StatusBar, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, Dimensions, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -31,14 +31,13 @@ const Login = () => {
   const Dispatch = useDispatch()
   const [passwordVisible, setPasswordVisible] = React.useState(false);
   const [loading, setLoading] = useState(false)
-  const { mutate, isPending } = useLogin()
+  const { mutate } = useLogin()
 
   const HandleLogin = async (values: any) => {
     setLoading(true)
     mutate({ password: values.password, emailAdd: values.email }, {
       onSuccess: (res) => {
         if (res.statusCode == 200) {
-          console.log("login token : ", res)
           Dispatch(setToken({ ...res.data, token: res.token }))
           Navigation.dispatch(
             CommonActions.reset({
@@ -153,7 +152,7 @@ const Login = () => {
                       style={styles.button}
                     >
                       {
-                        loading ? <Loader color={colors.white} size='small'/> : <>
+                        loading ? <Loader color={colors.white} size='small' /> : <>
                           <Text style={styles.buttonText}>Sign In</Text>
                           <ArrowRight size={20} color={colors.white} style={{ marginLeft: 8, marginTop: 5 }} /></>
                       }

@@ -7,10 +7,10 @@ import LottieView from 'lottie-react-native';
 interface CountdownTimerProps {
   endDate: string;
   myStyle?: any
-  size?: number // Expected format: "DD-MM-YYYY HH:mm:ss"
+  size?: number
 }
 
-const CountdownTimer: React.FC<CountdownTimerProps> = React.memo(({ endDate, myStyle = {}, size = 20 }) => {
+const CountdownTimer: React.FC<CountdownTimerProps> = React.memo(({  endDate, myStyle = {}, size = 20 }) => {
   const calculateTimeLeft = useCallback(() => {
     if (!endDate) return null;
 

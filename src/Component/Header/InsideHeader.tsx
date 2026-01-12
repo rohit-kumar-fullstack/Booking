@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    Image,
-    StyleSheet,
-    Dimensions,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
 import colors from '../../Constant/Color';
@@ -23,7 +16,7 @@ interface HeaderProps {
 }
 
 const InsideHeader: React.FC<HeaderProps> = ({ title, showArrow = false }) => {
-    const navigation:any = useNavigation();
+    const navigation: any = useNavigation();
     const insets = useSafeAreaInsets();
 
     return (

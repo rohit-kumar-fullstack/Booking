@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { NavigationString, showErrorAlert, Variable } from '../Constant/AllImports';
 import { setToken } from '../Redux/Slices/Token';
 import { store } from '../Redux/Store';
 
@@ -12,24 +11,20 @@ export const apiCall = async <R, D = {}>(
 ): Promise<R> => {
   try {
     const token: any = store.getState().token.token;
-
     const response = await axios({
       method,
       url,
       data,
       params,
-      // withCredentials: true,
-      // baseURL: Variable.Main_Base,
       headers: {
         Authentication: `Bearer ${token?.token}`,
         'Content-Type': contentType || 'application/json',
       },
     });
-
     return response.data;
   } catch (error: any) {
     const errorMessage = error?.response?.data?.error;
-    { error?.response?.data?.error && showErrorAlert(error?.response?.data?.error || '') }
+    console.log(errorMessage, '---------------------------api error message');
 
     if (error?.response?.status === 401) {
       store.dispatch(setToken({}));

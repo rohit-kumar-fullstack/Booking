@@ -12,6 +12,7 @@ import * as LucideIcons from 'lucide-react-native';
 import Screens from '../Screens';
 import colors from '../Constant/Color';
 import NavigationString from '../Constant/NavigationString';
+import EditableExcel from '../Screens/Tender/Component/EditableExcel';
 
 const { width } = Dimensions.get('window');
 const TAB_BAR_HEIGHT = 60;
@@ -24,6 +25,7 @@ const TabButton = ({ route, isFocused, onPress }: any) => {
         Home: { outline: "Home", filled: "Home" },
         Auction: { outline: "Gavel", filled: "Gavel" },
         Tender: { outline: "FileText", filled: "FileText" },
+        EditableExcel: { outline: "FileText", filled: "FileText" },
     };
     const IconName = LucideIcons[isFocused ? icons[route.name].filled : icons[route.name].outline];
     const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -146,6 +148,7 @@ export default function BottomTab() {
                 <Tab.Screen name="Home" component={Screens.Home} />
                 <Tab.Screen name={NavigationString.Auction} component={Screens.Auction} />
                 <Tab.Screen name={NavigationString.Tender} component={Screens.Tender} />
+                <Tab.Screen name={'EditableExcel'} component={EditableExcel} />
             </Tab.Navigator>
         </View>
     );

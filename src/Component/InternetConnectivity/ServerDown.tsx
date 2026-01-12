@@ -1,42 +1,16 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-  ScrollView,
-  StatusBar,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, StatusBar } from 'react-native';
 import LottieView from 'lottie-react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {
-  AlertCircle,
-  Clock,
-  Server,
-  Calendar,
-  RefreshCw,
-  MessageCircle,
-  Twitter,
-  Activity,
-  MessageSquare,
-  Bell,
-  WifiOff,
-} from 'lucide-react-native';
-import Colors from '../../Styles/Color';
+import { AlertCircle, Clock, RefreshCw, Activity } from 'lucide-react-native';
+import colors from '../../Constant/Color';
 import FontsFamily from '../../Constant/FontsFamily';
 
-const {width} = Dimensions.get('window');
 
 const ServerDown = () => {
   return (
     <>
-      <StatusBar
-        // translucent={true}
-        // backgroundColor="transparent"
-        barStyle="dark-content"
-      />
-      
+      <StatusBar barStyle="dark-content" />
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}>
@@ -81,12 +55,12 @@ const ServerDown = () => {
               <View style={styles.buttonGroup}>
                 <TouchableOpacity
                   activeOpacity={0.7}
-                  onPress={() => {}}
+                  onPress={() => { }}
                   style={styles.touchable}>
                   <LinearGradient
-                    colors={[Colors.appColourDark, Colors.appColourDarkDim]}
-                    start={{x: 0, y: 0}}
-                    end={{x: 1, y: 0}}
+                    colors={[colors.primary, colors.primaryLight]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
                     style={styles.primaryButton}>
                     <RefreshCw
                       size={20}
@@ -140,9 +114,9 @@ const styles = StyleSheet.create({
     paddingVertical: 36,
     paddingHorizontal: 28,
     alignItems: 'center',
-    shadowColor: Colors.appColourDark,
+    shadowColor: colors.primary,
     shadowOpacity: 0.08,
-    shadowOffset: {width: 0, height: 12},
+    shadowOffset: { width: 0, height: 12 },
     shadowRadius: 24,
     elevation: 10,
     borderWidth: 1,
@@ -162,18 +136,18 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: Colors.appColourDark,
+    backgroundColor: colors.primary,
     opacity: 0.2,
   },
   statusDot: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: Colors.appColourDarkDim,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: Colors.appColourDark,
-    shadowOffset: {width: 0, height: 4},
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,
@@ -310,7 +284,7 @@ const styles = StyleSheet.create({
   touchable: {
     width: '100%',
     shadowColor: '#FF6B6B',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,

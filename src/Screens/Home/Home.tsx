@@ -1,30 +1,9 @@
 import React, { useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  FlatList,
-  ActivityIndicator,
-} from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withDelay,
-  withTiming,
-} from 'react-native-reanimated';
-import {
-  Layers,
-  Clock,
-  ShoppingCart,
-  X,
-  FileText,
-} from 'lucide-react-native';
+import { View, Text, StyleSheet, Dimensions, FlatList, ActivityIndicator } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withDelay, withTiming } from 'react-native-reanimated';
+import { Layers, Clock, ShoppingCart, X, FileText } from 'lucide-react-native';
 import { Header } from '../../Component/Index';
 import colors from '../../Constant/Color';
-import { useWebSocketService } from '../../socket/Socket';
-import Variables from '../../Constant/Variable';
-import { useFocusEffect } from '@react-navigation/native';
 import { useDashboard } from '../../Services/BBPS/Hooks';
 
 const { width } = Dimensions.get('window');

@@ -1,5 +1,5 @@
 import React, { memo, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import Modal from 'react-native-modal';
 import { Package, IndianRupee, FileText, Download, ArrowLeft, Info, } from 'lucide-react-native';
 import colors from '../../../Constant/Color';
@@ -11,30 +11,29 @@ import { Loader } from '../../../Component/Index';
 
 interface Props { visible: boolean; onClose: () => void; data?: any; }
 
+const Section = ({ title, icon: Icon, children }: any) => (
+    <View style={styles.sectionCard}>
+        <View style={styles.sectionHeader}>
+            <View style={styles.iconCircle}>
+                <Icon size={18} color={colors.primary} strokeWidth={2.5} />
+            </View>
+            <Text style={styles.sectionTitle}>{title}</Text>
+        </View>
+        {children}
+    </View>
+);
+
+const PriceTile = ({ label, fig, words, full = false }: any) => (
+    <View style={[styles.priceTile, full ? { width: '100%' } : { width: '48%' }]}>
+        <Text style={styles.label}>{label}</Text>
+        <Text style={styles.priceFig}>₹{Number(fig).toLocaleString('en-IN')}</Text>
+        <Text style={styles.priceWords}>{words}</Text>
+    </View>
+);
 const AuctionItemDetail: React.FC<Props> = ({ visible, onClose, data }) => {
     const inset = useSafeAreaInsets()
     const [allBoolean, setAllBoolean] = useState({ fileLoading: false });
     const { data: itemData } = useAucitonItemDetail({ auctionItemId: data.id });
-
-    const Section = ({ title, icon: Icon, children }: any) => (
-        <View style={styles.sectionCard}>
-            <View style={styles.sectionHeader}>
-                <View style={styles.iconCircle}>
-                    <Icon size={18} color={colors.primary} strokeWidth={2.5} />
-                </View>
-                <Text style={styles.sectionTitle}>{title}</Text>
-            </View>
-            {children}
-        </View>
-    );
-
-    const PriceTile = ({ label, fig, words, full = false }: any) => (
-        <View style={[styles.priceTile, full ? { width: '100%' } : { width: '48%' }]}>
-            <Text style={styles.label}>{label}</Text>
-            <Text style={styles.priceFig}>₹{Number(fig).toLocaleString('en-IN')}</Text>
-            <Text style={styles.priceWords}>{words}</Text>
-        </View>
-    );
 
     const handleDownload = async (id: number, fileName: string) => {
         try {
@@ -79,6 +78,7 @@ const AuctionItemDetail: React.FC<Props> = ({ visible, onClose, data }) => {
             setAllBoolean((prev: any) => ({ ...prev, fileLoading: false }));
         }
     };
+    console.log(data, 'kkkkk---');
 
     return (
         <Modal
@@ -133,16 +133,16 @@ const AuctionItemDetail: React.FC<Props> = ({ visible, onClose, data }) => {
 
                     <Section title="Reserve & Bid Values" icon={IndianRupee}>
                         <PriceTile
-                            label="Reserve Price"
-                            fig={data.reservePrice}
-                            words={data.reservePriceInWords}
+                            label="Bidding Price"
+                            fig={data.reservePrice || data.emdAmount}
+                            words={data.reservePriceInWords || data.emdAmountInWords}
                             full
                         />
                         <View style={styles.hDivider} />
                         <PriceTile
                             label="Auction Start Value"
-                            fig={data.reservePrice}
-                            words={data.reservePriceInWords}
+                            fig={data.reservePrice || data.auctionStartValueFigure}
+                            words={data.reservePriceInWords || data.auctionStartValueWords}
                             full
                         />
                         <View style={styles.hDivider} />
@@ -165,7 +165,7 @@ const AuctionItemDetail: React.FC<Props> = ({ visible, onClose, data }) => {
                         </View>
 
                         {itemData?.map((doc: any, index: any) => (
-                            <TouchableOpacity style={styles.docRow} activeOpacity={0.7} onPress={() => { handleDownload(doc.assetId, doc.fileName) }} key={index}>
+                            <TouchableOpacity style={styles.docRow} activeOpacity={0.7} onPress={() => { handleDownload(doc.assetId, doc.fileName) }} key={doc.assetId}>
                                 <Text style={styles.docIndex}>{index + 1}</Text>
                                 <View style={{ flex: 2 }}>
                                     <Text style={styles.docTitle} numberOfLines={1}>{doc.fileName}</Text>

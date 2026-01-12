@@ -143,8 +143,6 @@ const SideDrawer: React.FC<Props> = ({ visible, onClose }) => {
 
 export default SideDrawer;
 
-/* ================= Styles ================= */
-
 const styles = StyleSheet.create({
   modal: {
     margin: 0,

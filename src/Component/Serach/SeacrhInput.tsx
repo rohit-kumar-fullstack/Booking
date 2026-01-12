@@ -1,12 +1,7 @@
 import { Filter, Search } from "lucide-react-native";
 import React from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Platform } from "react-native";
-import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
-    interpolateColor
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming, interpolateColor } from "react-native-reanimated";
 import colors from "../../Constant/Color";
 
 export interface SearchType {
@@ -19,21 +14,14 @@ export interface SearchType {
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 
-export const SearchInput: React.FC<SearchType> = ({
-    placeholder,
-    onChange,
-    label,
-    filter = true,
-    filterPress
-}) => {
+export const SearchInput: React.FC<SearchType> = ({ placeholder, onChange, label, filter = true, filterPress }) => {
     const isFocused = useSharedValue(0);
 
-    // Animate border color and shadow based on focus
     const inputContainerStyle = useAnimatedStyle(() => {
         const borderColor = interpolateColor(
             isFocused.value,
             [0, 1],
-            [colors.grayText + '50', colors.grayText] // Assuming colors.primary exists
+            [colors.grayText + '50', colors.grayText]
         );
 
         return {

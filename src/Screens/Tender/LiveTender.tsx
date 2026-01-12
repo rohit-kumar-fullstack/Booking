@@ -57,8 +57,8 @@ const LiveTender = () => {
                 tenderOfWork={item.departmentName}
                 tenderFees={item.documentFees}
                 tenderNumber={item.tenderNumber}
-                // onPurchasePress={() => { Dispatch(togglePurchaseTender(item)) }}
-                // onDetailsPress={() => navigation.navigate('LiveTenderDetail', {item})}
+                onPurchasePress={() => { Dispatch(togglePurchaseTender(item)) }}
+                onDetailsPress={() => navigation.navigate('LiveTenderDetail', { item })}
             />
         },
         [SelectedPurchaseList]
@@ -104,7 +104,7 @@ const LiveTender = () => {
                             fontWeight: '500',
                         }}
                     >
-                        Refreshing auctions
+                        Refreshing Tender
                     </Text>
                 </Animated.View>
             )}
@@ -122,7 +122,7 @@ const LiveTender = () => {
                     <RefreshControl
                         refreshing={isRefetching}
                         onRefresh={refetch}
-                        tintColor="transparent" // Set to transparent if you only want your custom banner to show
+                        tintColor="transparent"
                         colors={[colors.primary]}
                     />
                 }
