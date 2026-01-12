@@ -6,8 +6,8 @@ import { apiCall } from "../../Axios/Axios";
 
 export const userLogin = async (payload: { emailAdd: string, password: string }): Promise<any> => {
   try {
-    const response = await axios.post(LOG_IN_URL, { ...payload, divice: "mobileApp" });
-    // const response = await axios.post(TENDER_LOGIN, { ...payload, device: "mobileApp" });
+    // const response = await axios.post(LOG_IN_URL, { ...payload, divice: "mobileApp" });
+    const response = await axios.post(TENDER_LOGIN, { ...payload, device: "mobileApp" });
     return response.data;
   } catch (error: any) {
     throw error.response?.data || error.message;
