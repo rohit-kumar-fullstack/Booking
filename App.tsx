@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AlertNotificationRoot } from 'react-native-alert-notification';
 import { PersistGate } from 'redux-persist/integration/react';
 import { Provider } from 'react-redux';
+import { PaperProvider } from 'react-native-paper';
 import { persistor, store } from './src/Redux/Store.js';
 import Routes from './src/Navigation/Routes.jsx';
 import { NavigationContainer } from '@react-navigation/native';
@@ -21,12 +22,14 @@ const App = () => {
         <GestureHandlerRootView style={{ flex: 1 }}>
           <AlertNotificationRoot>
             <Provider store={store}>
-              <PersistGate persistor={persistor}>
-                <View style={{ flex: 1, backgroundColor: colors.white, paddingBottom: insets.bottom }}>
-                  <StatusBar barStyle="dark-content" />
-                  <Routes />
-                </View>
-              </PersistGate>
+              <PaperProvider>
+                <PersistGate persistor={persistor}>
+                  <View style={{ flex: 1, backgroundColor: colors.white, paddingBottom: insets.bottom }}>
+                    <StatusBar barStyle="dark-content" />
+                    <Routes />
+                  </View>
+                </PersistGate>
+              </PaperProvider>
             </Provider>
           </AlertNotificationRoot>
         </GestureHandlerRootView>

@@ -31,8 +31,26 @@ export default function MainStack() {
       <Stack.Screen name={NavigationString.Onboarding} component={Screens.Onboarding} options={option} />
       <Stack.Screen name={NavigationString.Login} component={Screens.Login} options={option} />
       <Stack.Screen name={NavigationString.Home} component={Screens.Home} options={option} />
-
-
+      <Stack.Screen
+        name={NavigationString.ProductDetail}
+        component={Screens.ProductDetail}
+        options={option}
+      />
+      <Stack.Screen
+        name={NavigationString.Cart}
+        component={Screens.Cart}
+        options={option}
+      />
+        <Stack.Screen
+        name={NavigationString.HelpSupport}
+        component={Screens.HelpSupport}
+        options={option}
+      />
+        <Stack.Screen
+        name={NavigationString.WishListProduct}
+        component={Screens.WishListProduct}
+        options={option}
+      />
     </Stack.Navigator>
   );
 }
