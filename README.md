@@ -1,99 +1,116 @@
-App Flow (How it works)
-<!-- ----------------------------------- -->
-Login
+# React Native E-Commerce App
 
-User logs in using email and password
+## a. Framework Choice and Why
 
-Login is dummy-based (no real API or backend)
+This application is built using React Native, a popular framework for building cross-platform mobile applications using JavaScript and React.
 
-After successful login, the user is redirected to the Booking screen
+As a React Native developer, I chose this framework because it allows me to build high-performance mobile applications for both Android and iOS using a single codebase while still delivering a near-native user experience.
 
-<!-- ------------------------------------------ -->
+### Why React Native?
 
-Booking Screen
+* **Cross-Platform Development** – A single codebase works for both Android and iOS.
+* **Large Ecosystem** – Strong community support and many libraries available.
+* **Fast Development** – Features like hot reload make development faster.
+* **Native Performance** – React Native renders native UI components.
+* **JavaScript/React Based** – Easy for web developers to transition into mobile development.
 
-All created bookings are shown in a list
+The app also uses:
 
-Each booking card displays:
+* **Redux Toolkit** for state management (cart management).
+* **React Navigation** for screen navigation.
+* **Lucide React Native Icons** for modern UI icons.
+* **Lottie Animations** for improved user experience.
 
-Customer name
+---
 
-Booking date
+## b. How to Run the App from Scratch
 
-Selected service
+Follow these steps to run the project locally.
 
-Cards appear with smooth animations when the screen loads
+### 1. Clone the Repository
 
-<!-- --------------------------------------------- -->
+```bash
+git clone <repository-url>
+cd <project-folder>
+```
 
-Filter Bookings
+### 2. Install Dependencies
 
-User can filter bookings based on service type
+```bash
+npm install -f
+```
 
-Example filters:
+or
 
-Hotel
 
-Cab
+### 3. Install Android Dependencies
 
-Resort
+cd android
+gradlew clean
+cd ..
+```
 
-Flight
+### 4. Start Metro Bundler
 
-Filter works instantly on the list
+```bash
+npx react-native start
+```
 
-<!-- ------------------------------------- -->
+### 5. Run the Application
 
-Create Booking
+For Android:
 
-A floating “+” button is available on the booking screen
+```bash
+npx react-native run-android
+```
 
-When pressed:
+### 6. Create Release Build (Optional)
 
-A full-screen modal opens
+```bash
+cd android
+gradlew assembleRelease
+```
 
-User enters:
 
-Name
 
-Booking date (using date picker)
+## c. Known Limitations
 
-Service (dropdown)
+* The app currently uses **static product data** from an API (or mock data).
+* No **backend authentication or user login system** is implemented.
+* Cart data is stored in **Redux state only**, so it resets when the app restarts.
+* No **offline support** for product data.
+* Payment functionality is only a **UI simulation** and not connected to a real payment gateway.
 
-All fields are required
+---
 
-Validation is applied and errors are shown with red borders
+## d. Future Improvements
 
-Save Booking
+With more development time, the following improvements could be added:
 
-On submit:
+* **Persistent Cart Storage** using AsyncStorage or local database.
+* **User Authentication** (Login/Signup).
+* **Real Payment Gateway Integration** (Stripe, Razorpay, etc.).
+* **Product Search and Filtering** functionality.
+* **Wishlist Feature** for saving products.
+* **Push Notifications** for offers and order updates.
+* **Performance Optimization** using memoization and lazy loading.
+* **Unit and Integration Testing** for better reliability.
+* **Better Error Handling and Loading States**.
+* **UI/UX Enhancements** such as skeleton loaders and smoother animations.
 
-A random unique ID is generated
+---
 
-Booking is saved in Redux
+## Tech Stack
 
-Modal closes automatically
+* React Native
+* Redux Toolkit
+* React Navigation
+* Lucide Icons
+* Lottie Animations
 
-New booking appears instantly in the list
+---
 
-<!-- ------------------------------------- -->
+## Author
 
-Delete Booking
-
-Each booking card has a trash icon
-
-On pressing it:
-
-Booking is deleted
-
-A success message is shown
-
-List updates immediately
-
-<!-- ----------------------------------------- -->
-
-Pull to Refresh
-
-User can pull down the list to refresh bookings
-
-This simulates reloading data for better UX
+Rohit Kumar
+Mobile Application Developer
