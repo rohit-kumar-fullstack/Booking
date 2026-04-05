@@ -7,6 +7,7 @@ import colors from '../../Constant/Color';
 import FontsFamily from '../../Constant/FontsFamily';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { mmkvStorage } from '../../Utils/Storage/Storage';
 const { width } = Dimensions.get('window');
 const slides = [
     {
@@ -39,7 +40,7 @@ const Onboarding = () => {
     const Navigation: any = useNavigation()
 
     const onFinish = async () => {
-        await AsyncStorage.setItem('onBoarding', 'true');
+        mmkvStorage.setItem('onBoarding', 'true');
         Navigation.navigate(NavigationString.Login)
     };
 

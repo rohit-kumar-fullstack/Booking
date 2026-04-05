@@ -1,10 +1,11 @@
-import {configureStore} from '@reduxjs/toolkit';
-import {combineReducers} from 'redux';
-import {persistStore, persistReducer} from 'redux-persist';
+import { configureStore } from '@reduxjs/toolkit';
+import { combineReducers } from 'redux';
+import { persistStore, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {tokenSlice} from './Slices/Token';
-import {cartSlice} from './Slices/AddToCartProduct';
-import {searchSlice} from './Slices/searchSlice';
+import { tokenSlice } from './Slices/Token';
+import { cartSlice } from './Slices/AddToCartProduct';
+import { searchSlice } from './Slices/searchSlice';
+import { mmkvStorage } from '../Utils/Storage/Storage';
 
 const rootReducer = combineReducers({
   token: tokenSlice.reducer,
@@ -13,7 +14,7 @@ const rootReducer = combineReducers({
 });
 const persistConfig = {
   key: 'root',
-  storage: AsyncStorage,
+  storage: mmkvStorage,
   whitelist: ['token', 'cart', 'search'],
 };
 const persistReducers = persistReducer(persistConfig, rootReducer);

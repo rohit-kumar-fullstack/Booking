@@ -13,6 +13,7 @@ import FontsFamily from '../../Constant/FontsFamily';
 import NavigationString from '../../Constant/NavigationString';
 import { useDispatch } from 'react-redux';
 import { setToken } from '../../Redux/Slices/Token';
+import { mmkvStorage } from '../../Utils/Storage/Storage';
 const hapticOptions = {
   enableVibrateFallback: true,
   ignoreAndroidSystemSettings: false
@@ -34,7 +35,7 @@ const Login = () => {
 
     setTimeout(() => {
       setLoading(false)
-      Dispatch(setToken({ token: 'dummy-auth-token' }));
+      mmkvStorage.setItem('token', 'dummy-auth-token')
       Navigation.dispatch(
         CommonActions.reset({
           index: 0,

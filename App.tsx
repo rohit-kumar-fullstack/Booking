@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { LogBox, StatusBar, View } from 'react-native';
@@ -6,11 +7,13 @@ import { AlertNotificationRoot } from 'react-native-alert-notification';
 import { PersistGate } from 'redux-persist/integration/react';
 import { Provider } from 'react-redux';
 import { PaperProvider } from 'react-native-paper';
-import { persistor, store } from './src/Redux/Store.js';
+import { persistor, store } from './src/Redux/Store';
 import Routes from './src/Navigation/Routes.jsx';
 import { NavigationContainer } from '@react-navigation/native';
 import colors from './src/Constant/Color';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import 'react-native-reanimated'
+import 'react-native-gesture-handler'
 LogBox.ignoreAllLogs(true);
 
 const App = () => {

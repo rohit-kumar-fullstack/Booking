@@ -1,20 +1,7 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
-
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  addToCart,
-  incrementQty,
-  decrementQty,
-} from '../../Redux/Slices/AddToCartProduct';
+import { addToCart, incrementQty, decrementQty } from '../../Redux/Slices/AddToCartProduct';
 import colors from '../../Constant/Color';
 import { ShoppingBag, Star } from 'lucide-react-native';
 
@@ -22,13 +9,9 @@ const { width } = Dimensions.get('window');
 
 const ProductDetail = ({ route, navigation }: any) => {
   const { product } = route.params;
-
   const dispatch = useDispatch();
-
   const cartProducts = useSelector((state: any) => state.cart.cartProducts);
-
   const currentQty = cartProducts[String(product.id)]?.qty || 0;
-
   const handleAddCart = () => {
     dispatch(
       addToCart({
@@ -77,12 +60,12 @@ const ProductDetail = ({ route, navigation }: any) => {
 
           <View style={styles.ratingBadge}>
             <Star size={24} color={colors.black} />
-            <Text style={styles.ratingText}>{product.rating.rate}</Text>
+            {/* <Text style={styles.ratingText}>{product.rating.rate}</Text> */}
           </View>
 
-          <Text style={styles.review}>
+          {/* <Text style={styles.review}>
             {product.rating.count} reviews
-          </Text>
+          </Text> */}
 
           {/* PRICE */}
 
@@ -95,7 +78,7 @@ const ProductDetail = ({ route, navigation }: any) => {
               <TouchableOpacity
                 style={styles.qtyBtn}
                 onPress={handleDecrement}>
-                <Text style={{fontSize: 18 , fontWeight:'500'}}>-</Text>
+                <Text style={{ fontSize: 18, fontWeight: '500' }}>-</Text>
               </TouchableOpacity>
 
               <Text style={styles.qtyValue}>{currentQty}</Text>
@@ -103,7 +86,7 @@ const ProductDetail = ({ route, navigation }: any) => {
               <TouchableOpacity
                 style={styles.qtyBtn}
                 onPress={handleIncrement}>
-                <Text style={{fontSize: 18 , fontWeight:'500'}}>+</Text>
+                <Text style={{ fontSize: 18, fontWeight: '500' }}>+</Text>
               </TouchableOpacity>
             </View>
           )}
